@@ -13,7 +13,7 @@ trap cleanup INT TERM EXIT HUP
 # --- ENV ---
 export PX4_PATH="./PX4-Autopilot"
 
-export PX4_GZ_WORLD=baylands
+export PX4_GZ_WORLD=aruco_floor
 # ------------------------------
 
 cd $PX4_PATH

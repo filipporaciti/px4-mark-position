@@ -1,8 +1,6 @@
-git submodule update --init --recursive --force
+./setup/global.sh
 
 cd PX4-Autopilot
-
-git submodule update --init --recursive --force
 
 ./Tools/setup/macos.sh --sim-tools
 
