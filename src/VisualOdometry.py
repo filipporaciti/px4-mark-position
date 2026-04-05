@@ -1,6 +1,7 @@
 import cv2
 import cv2.aruco as aruco
 import numpy as np
+import math
 
 
 class VisualOdometry:
@@ -44,7 +45,7 @@ class VisualOdometry:
 
     def get_position(self, frame, corners, ids):
         if ids is None or corners is None or frame is None:
-            return None
+            return None, None
 
         marker_length = 1.0 # Marker size in meters
         obj_points = np.array([
@@ -64,16 +65,24 @@ class VisualOdometry:
                 R, _ = cv2.Rodrigues(rvec)
                 camera_world_pos = -R.T @ tvec
 
+                pitch = 0
+                roll  = 0
+                yaw   = math.atan2(R[1, 0], R[0, 0])
+
                 cv2.putText(frame, f"X: {camera_world_pos[0][0]:.2f} m", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.putText(frame, f"Y: {camera_world_pos[1][0]:.2f} m", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.putText(frame, f"Z: {camera_world_pos[2][0]:.2f} m", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+
+                cv2.putText(frame, f"Roll: {roll:.1f}°", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+                cv2.putText(frame, f"Pitch: {pitch:.1f}°", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+                cv2.putText(frame, f"Yaw: {yaw:.1f}°", (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 
                 if self.show_video:
                     cv2.imshow('Gazebo Aruco Detection', frame)
 
-                return camera_world_pos.flatten()
+                return camera_world_pos.flatten(), (roll, pitch, yaw)
 
-
+        return None, None
 
 if __name__ == "__main__":
     video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"
@@ -83,7 +92,8 @@ if __name__ == "__main__":
     while True:
         frame = vo.get_frame()
         ids, corners = vo.process_frame(frame)
-        coordinates = vo.get_position(frame, corners, ids)
-        print(f"Estimated Position: X={coordinates[0]:.2f} m, Y={coordinates[1]:.2f} m, Z={coordinates[2]:.2f} m")
+        coordinates, angles = vo.get_position(frame, corners, ids)
+        if coordinates is not None and angles is not None:
+            print(f"Estimated Position: X={coordinates[0]:.2f} m, Y={coordinates[1]:.2f} m, Z={coordinates[2]:.2f} m", f"Roll={angles[0]:.1f}°, Pitch={angles[1]:.1f}°, Yaw={angles[2]:.1f}°")
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
