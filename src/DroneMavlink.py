@@ -17,6 +17,25 @@ class DroneMavlink:
         self.drone = System()
         self.visual_odometry = visual_odometry
 
+    
+    def get_covariance_matrix(self, dev_xy: float, dev_z: float, dev_yaw: float):
+        v_x = dev_xy**2
+        v_y = dev_xy**2
+        v_z = dev_z**2
+        v_roll = dev_yaw**2
+        v_pitch = dev_yaw**2
+        v_yaw = dev_yaw**2
+
+        cov_matrix = [
+            v_x, 0, 0, 0, 0, 0,
+                v_y, 0, 0, 0, 0,
+                    v_z, 0, 0, 0,
+                        v_roll, 0, 0,
+                            v_pitch, 0,
+                                v_yaw
+        ]
+        return cov_matrix
+
 
     async def run(self):
         await self.drone.connect(system_address=self.drone_address)
@@ -53,25 +72,7 @@ class DroneMavlink:
                 current_pitch = math.radians(attitude.pitch_deg)
                 break
 
-            st_dev_xy = 0.5
-            st_dev_z = coordinates[2] * 0.1
-            st_dev_angle = math.radians(2)
-
-            v_x = st_dev_xy**2
-            v_y = st_dev_xy**2
-            v_z = st_dev_z**2
-            v_roll = st_dev_angle**2
-            v_pitch = st_dev_angle**2
-            v_yaw = st_dev_angle**2
-
-            cov_matrix = [
-                v_x, 0, 0, 0, 0, 0,
-                    v_y, 0, 0, 0, 0,
-                        v_z, 0, 0, 0,
-                            v_roll, 0, 0,
-                                v_pitch, 0,
-                                    v_yaw
-            ]
+            cov_matrix = self.get_covariance_matrix(0.5, coordinates[2] * 0.1, math.radians(2))
 
             await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
                 timestamp_us,
