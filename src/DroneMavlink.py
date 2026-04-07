@@ -36,6 +36,14 @@ class DroneMavlink:
         ]
         return cov_matrix
 
+    async def get_roll_pitch(self):
+        roll = 0.0
+        pitch = 0.0
+        async for attitude in self.drone.telemetry.attitude_euler():
+            roll = math.radians(attitude.roll_deg)
+            pitch = math.radians(attitude.pitch_deg)
+            break
+        return pitch, roll
 
     async def run(self):
         await self.drone.connect(system_address=self.drone_address)
@@ -65,19 +73,14 @@ class DroneMavlink:
             old_coordinates = coordinates
             old_yaw = yaw
 
-            current_pitch = 0
-            current_roll = 0
-            async for attitude in self.drone.telemetry.attitude_euler():
-                current_roll = math.radians(attitude.roll_deg)
-                current_pitch = math.radians(attitude.pitch_deg)
-                break
+            pitch, roll = await self.get_roll_pitch()
 
             cov_matrix = self.get_covariance_matrix(0.5, coordinates[2] * 0.1, math.radians(2))
 
             await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
                 timestamp_us,
                 PositionBody(coordinates[1], coordinates[0], -coordinates[2]),
-                AngleBody(current_roll, -current_pitch, -yaw),
+                AngleBody(roll, -pitch, -yaw),
                 Covariance(cov_matrix)
                 ))
                 
