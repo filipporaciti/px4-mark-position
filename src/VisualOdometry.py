@@ -56,6 +56,10 @@ class VisualOdometry:
         ], dtype=np.float32)
 
         for i in range(len(ids)):
+
+            if ids[i][0] != 0: 
+                continue
+
             img_points = corners[i][0]
             success, rvec, tvec = cv2.solvePnP(obj_points, img_points, self.camera_matrix, self.dist_coeff)
 
