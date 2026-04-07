@@ -5,6 +5,13 @@ import math
 
 
 class VisualOdometry:
+    marker_length = 1.0 # Marker size in meters
+    obj_points = np.array([
+        [-marker_length/2,  marker_length/2, 0],
+        [ marker_length/2,  marker_length/2, 0],
+        [ marker_length/2, -marker_length/2, 0],
+        [-marker_length/2, -marker_length/2, 0]
+    ], dtype=np.float32)
 
     def __init__(self, video_url: str, marker_type: int, show_video: bool = True, camera_matrix=np.array([[260.0, 0.0, 640.0], [0.0, 260.0, 480.0], [0.0, 0.0, 1.0]], dtype=np.float32), dist_coeff=np.zeros(5)):
         self.video_url = video_url
@@ -47,21 +54,13 @@ class VisualOdometry:
         if ids is None or corners is None or frame is None:
             return None, None
 
-        marker_length = 1.0 # Marker size in meters
-        obj_points = np.array([
-            [-marker_length/2,  marker_length/2, 0],
-            [ marker_length/2,  marker_length/2, 0],
-            [ marker_length/2, -marker_length/2, 0],
-            [-marker_length/2, -marker_length/2, 0]
-        ], dtype=np.float32)
-
         for i in range(len(ids)):
 
             if ids[i][0] != 0: 
                 continue
 
             img_points = corners[i][0]
-            success, rvec, tvec = cv2.solvePnP(obj_points, img_points, self.camera_matrix, self.dist_coeff)
+            success, rvec, tvec = cv2.solvePnP(VisualOdometry.obj_points, img_points, self.camera_matrix, self.dist_coeff)
 
             if success:
                 cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeff, rvec, tvec, 0.05)
@@ -69,7 +68,7 @@ class VisualOdometry:
                 R, _ = cv2.Rodrigues(rvec)
                 camera_world_pos = -R.T @ tvec
 
-                yaw   = math.atan2(R[1, 0], R[0, 0])
+                yaw = math.atan2(R[1, 0], R[0, 0])
 
                 cv2.putText(frame, f"X: {camera_world_pos[0][0]:.2f} m", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.putText(frame, f"Y: {camera_world_pos[1][0]:.2f} m", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
