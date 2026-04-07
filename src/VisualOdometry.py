@@ -65,22 +65,18 @@ class VisualOdometry:
                 R, _ = cv2.Rodrigues(rvec)
                 camera_world_pos = -R.T @ tvec
 
-                pitch = 0
-                roll  = 0
                 yaw   = math.atan2(R[1, 0], R[0, 0])
 
                 cv2.putText(frame, f"X: {camera_world_pos[0][0]:.2f} m", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.putText(frame, f"Y: {camera_world_pos[1][0]:.2f} m", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 cv2.putText(frame, f"Z: {camera_world_pos[2][0]:.2f} m", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
 
-                cv2.putText(frame, f"Roll: {roll:.1f}°", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-                cv2.putText(frame, f"Pitch: {pitch:.1f}°", (10, 150), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-                cv2.putText(frame, f"Yaw: {yaw:.1f}°", (10, 180), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+                cv2.putText(frame, f"Yaw: {yaw:.1f} rad", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
                 
                 if self.show_video:
                     cv2.imshow('Gazebo Aruco Detection', frame)
 
-                return camera_world_pos.flatten(), (roll, pitch, yaw)
+                return camera_world_pos.flatten(), yaw
 
         return None, None
 
