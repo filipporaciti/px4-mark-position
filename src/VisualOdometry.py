@@ -49,6 +49,16 @@ class VisualOdometry:
             cv2.imshow('Gazebo Aruco Detection', frame)
         
         return ids, corners
+    
+    def print_text(self, frame, position, yaw):
+        cv2.putText(frame, f"X: {position[0][0]:.2f} m", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        cv2.putText(frame, f"Y: {position[1][0]:.2f} m", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        cv2.putText(frame, f"Z: {position[2][0]:.2f} m", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+
+        cv2.putText(frame, f"Yaw: {yaw:.1f} rad", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        
+        if self.show_video:
+            cv2.imshow('Gazebo Aruco Detection', frame)
 
     def get_position(self, frame, corners, ids):
         if ids is None or corners is None or frame is None:
@@ -70,14 +80,7 @@ class VisualOdometry:
 
                 yaw = math.atan2(R[1, 0], R[0, 0])
 
-                cv2.putText(frame, f"X: {camera_world_pos[0][0]:.2f} m", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-                cv2.putText(frame, f"Y: {camera_world_pos[1][0]:.2f} m", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-                cv2.putText(frame, f"Z: {camera_world_pos[2][0]:.2f} m", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-
-                cv2.putText(frame, f"Yaw: {yaw:.1f} rad", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
-                
-                if self.show_video:
-                    cv2.imshow('Gazebo Aruco Detection', frame)
+                self.print_text(frame, camera_world_pos, yaw)
 
                 return camera_world_pos.flatten(), yaw
 
