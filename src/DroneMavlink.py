@@ -53,7 +53,7 @@ class DroneMavlink:
                 current_pitch = math.radians(attitude.pitch_deg)
                 break
 
-            st_dev_xy = 0.0
+            st_dev_xy = 0.5
             st_dev_z = coordinates[2] * 0.1
             st_dev_angle = math.radians(2)
 
@@ -75,7 +75,7 @@ class DroneMavlink:
 
             await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
                 timestamp_us,
-                PositionBody(0, 0, -coordinates[2]),
+                PositionBody(coordinates[1], coordinates[0], -coordinates[2]),
                 AngleBody(current_roll, -current_pitch, -yaw),
                 Covariance(cov_matrix)
                 ))
