@@ -66,9 +66,6 @@ class VisualOdometry:
 
         for i in range(len(ids)):
 
-            if ids[i][0] != 0: 
-                continue
-
             img_points = corners[i][0]
             success, rvec, tvec = cv2.solvePnP(VisualOdometry.obj_points, img_points, self.camera_matrix, self.dist_coeff)
 
@@ -79,6 +76,9 @@ class VisualOdometry:
                 camera_world_pos = -R.T @ tvec
 
                 camera_world_pos = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]]) @ camera_world_pos
+
+                camera_world_pos[1] = (ids[i][0]%4) * (2) + camera_world_pos[1]
+                camera_world_pos[0] = (ids[i][0]//4) * (2) + camera_world_pos[0]
 
                 yaw = -math.atan2(R[1, 0], R[0, 0])
 
