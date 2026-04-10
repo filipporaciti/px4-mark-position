@@ -4,6 +4,7 @@ import time
 
 from cv2 import aruco
 import cv2
+import numpy as np
 from VisualOdometry import VisualOdometry
 
 from mavsdk import System
@@ -75,7 +76,7 @@ class DroneMavlink:
 
             pitch, roll = await self.get_roll_pitch()
 
-            cov_matrix = self.get_covariance_matrix(0.5, coordinates[2] * 0.1, math.radians(2))
+            cov_matrix = self.get_covariance_matrix(0.1, coordinates[2] * 0.05, math.radians(1))
 
             await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
                 timestamp_us,
@@ -89,6 +90,11 @@ if __name__ == "__main__":
     drone_address = "udpin://0.0.0.0:14540"
     video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"
     marker_type = aruco.DICT_4X4_50
-    visual_odometry = VisualOdometry(video_url, marker_type)
+    camera_matrix = np.array([
+        [537.0, 0.0, 640.0], 
+        [0.0, 537.0, 480.0], 
+        [0.0, 0.0, 1.0]], 
+        dtype=np.float32)
+    visual_odometry = VisualOdometry(video_url, marker_type, camera_matrix)
     droneMavlink = DroneMavlink(drone_address, visual_odometry)
     asyncio.run(droneMavlink.run())

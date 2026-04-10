@@ -5,7 +5,7 @@ import math
 
 
 class VisualOdometry:
-    marker_length = 1.0 # Marker size in meters
+    marker_length = 0.5 # Marker size in meters
     obj_points = np.array([
         [-marker_length/2,  marker_length/2, 0],
         [ marker_length/2,  marker_length/2, 0],
@@ -13,7 +13,7 @@ class VisualOdometry:
         [-marker_length/2, -marker_length/2, 0]
     ], dtype=np.float32)
 
-    def __init__(self, video_url: str, marker_type: int, show_video: bool = True, camera_matrix=np.array([[260.0, 0.0, 640.0], [0.0, 260.0, 480.0], [0.0, 0.0, 1.0]], dtype=np.float32), dist_coeff=np.zeros(5)):
+    def __init__(self, video_url: str, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, dist_coeff=np.zeros(5)):
         self.video_url = video_url
         self.marker_type = marker_type
         self.show_video = show_video
@@ -89,7 +89,13 @@ class VisualOdometry:
 if __name__ == "__main__":
     video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"
     marker_type = aruco.DICT_4X4_50
-    vo = VisualOdometry(video_url, marker_type)
+    camera_matrix = np.array([
+        [537.0, 0.0, 640.0], 
+        [0.0, 537.0, 480.0], 
+        [0.0, 0.0, 1.0]], 
+        dtype=np.float32)
+    
+    vo = VisualOdometry(video_url, marker_type, camera_matrix)
 
     while True:
         frame = vo.get_frame()
