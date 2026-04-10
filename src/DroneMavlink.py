@@ -80,8 +80,8 @@ class DroneMavlink:
 
             await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
                 timestamp_us,
-                PositionBody(coordinates[1], coordinates[0], -coordinates[2]),
-                AngleBody(roll, -pitch, -yaw),
+                PositionBody(coordinates[0], coordinates[1], coordinates[2]),
+                AngleBody(roll, pitch, yaw),
                 Covariance(cov_matrix)
                 ))
                 

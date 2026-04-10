@@ -78,7 +78,9 @@ class VisualOdometry:
                 R, _ = cv2.Rodrigues(rvec)
                 camera_world_pos = -R.T @ tvec
 
-                yaw = math.atan2(R[1, 0], R[0, 0])
+                camera_world_pos = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]]) @ camera_world_pos
+
+                yaw = -math.atan2(R[1, 0], R[0, 0])
 
                 self.print_text(frame, camera_world_pos, yaw)
 
@@ -100,8 +102,8 @@ if __name__ == "__main__":
     while True:
         frame = vo.get_frame()
         ids, corners = vo.process_frame(frame)
-        coordinates, angles = vo.get_position(frame, corners, ids)
-        if coordinates is not None and angles is not None:
-            print(f"Estimated Position: X={coordinates[0]:.2f} m, Y={coordinates[1]:.2f} m, Z={coordinates[2]:.2f} m", f"Roll={angles[0]:.1f}°, Pitch={angles[1]:.1f}°, Yaw={angles[2]:.1f}°")
+        coordinates, yaw = vo.get_position(frame, corners, ids)
+        if coordinates is not None and yaw is not None:
+            print(f"Estimated Position: X={coordinates[0]:.2f} m, Y={coordinates[1]:.2f} m, Z={coordinates[2]:.2f} m", f"Yaw={yaw:.1f} rad")
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
