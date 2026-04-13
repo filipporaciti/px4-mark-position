@@ -6,6 +6,7 @@ from cv2 import aruco
 import cv2
 import numpy as np
 from VisualOdometry import VisualOdometry
+from PIDVisualizer import PIDVisualizer
 
 from mavsdk import System
 from mavsdk.mocap import VisionPositionEstimate, Covariance, AngleBody, PositionBody
@@ -17,6 +18,7 @@ class DroneMavlink:
         self.drone_address = drone_address
         self.drone = System()
         self.visual_odometry = visual_odometry
+        self.pid_visualizer = PIDVisualizer()
 
     
     def get_covariance_matrix(self, dev_xy: float, dev_z: float, dev_yaw: float):
@@ -73,6 +75,7 @@ class DroneMavlink:
                 yaw = old_yaw
             old_coordinates = coordinates
             old_yaw = yaw
+            self.pid_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=0.0, target_y=0.0, target_z=-3.0)
 
             pitch, roll = await self.get_roll_pitch()
 
