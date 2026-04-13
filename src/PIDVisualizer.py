@@ -14,6 +14,8 @@ class PIDVisualizer:
         self.colors = {'X': (0, 0, 255), 'Y': (0, 255, 0), 'Z': (255, 100, 0)}
         self.target_color = (0, 255, 255) 
 
+        self._render()
+
     def update(self, val_x, val_y, val_z, target_x=0, target_y=0, target_z=0):
         targets = [target_x, target_y, target_z]
         values = [val_x, val_y, val_z]

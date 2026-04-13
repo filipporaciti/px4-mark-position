@@ -1,12 +1,7 @@
 import asyncio
 import math
 import time
-
-from cv2 import aruco
 import cv2
-import numpy as np
-from VisualOdometry import VisualOdometry
-from PIDVisualizer import PIDVisualizer
 
 from mavsdk import System
 from mavsdk.mocap import VisionPositionEstimate, Covariance, AngleBody, PositionBody
@@ -14,11 +9,12 @@ from mavsdk.mocap import VisionPositionEstimate, Covariance, AngleBody, Position
 
 class DroneMavlink:
 
-    def __init__(self, drone_address: str, visual_odometry: VisualOdometry):
+    def __init__(self, drone_address: str):
         self.drone_address = drone_address
         self.drone = System()
-        self.visual_odometry = visual_odometry
-        self.pid_visualizer = PIDVisualizer()
+
+        self.__old_coordinates = [0.0, 0.0, 0.0]
+        self.__old_yaw = 0.0
 
     
     def get_covariance_matrix(self, dev_xy: float, dev_z: float, dev_yaw: float):
@@ -47,8 +43,8 @@ class DroneMavlink:
             pitch = math.radians(attitude.pitch_deg)
             break
         return pitch, roll
-
-    async def run(self):
+    
+    async def connect(self):
         await self.drone.connect(system_address=self.drone_address)
 
         print("Waiting for drone to connect...")
@@ -56,48 +52,41 @@ class DroneMavlink:
             if state.is_connected:
                 print("-- Connected to drone!")
                 break
-            
-        old_coordinates = [0.0, 0.0, 0.0]
-        old_yaw = 0.0
 
+    async def update_position(self, timestamp_us, coordinates, yaw):
+        if coordinates is None or yaw is None:
+            coordinates = self.__old_coordinates
+            yaw = self.__old_yaw
+        self.__old_coordinates = coordinates
+        self.__old_yaw = yaw
+
+        pitch, roll = await self.get_roll_pitch()
+
+        cov_matrix = self.get_covariance_matrix(0.05, coordinates[2] * 0.05, math.radians(1))
+
+        await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
+            timestamp_us,
+            PositionBody(coordinates[0], coordinates[1], coordinates[2]),
+            AngleBody(roll, pitch, yaw),
+            Covariance(cov_matrix)
+            ))         
+
+
+if __name__ == "__main__":
+    drone_address = "udpin://0.0.0.0:14540"
+    droneMavlink = DroneMavlink(drone_address)
+
+    async def run_async():
+        await droneMavlink.connect()
         while True:
             timestamp_us = int(time.time() * 1e6) # Seconds to microseconds
 
-            frame = self.visual_odometry.get_frame()
-            ids, corners = self.visual_odometry.process_frame(frame)
-            coordinates, yaw = self.visual_odometry.get_position(frame, corners, ids)
+            coordinates = [0.0, 0.0, 0.0]
+            yaw = 0.0
+
+            await droneMavlink.update_position(timestamp_us, coordinates, yaw)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-            if coordinates is None or yaw is None:
-                coordinates = old_coordinates
-                yaw = old_yaw
-            old_coordinates = coordinates
-            old_yaw = yaw
-            self.pid_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=0.0, target_y=0.0, target_z=-3.0)
-
-            pitch, roll = await self.get_roll_pitch()
-
-            cov_matrix = self.get_covariance_matrix(0.05, coordinates[2] * 0.05, math.radians(1))
-
-            await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
-                timestamp_us,
-                PositionBody(coordinates[0], coordinates[1], coordinates[2]),
-                AngleBody(roll, pitch, yaw),
-                Covariance(cov_matrix)
-                ))
-                
-
-if __name__ == "__main__":
-    drone_address = "udpin://0.0.0.0:14540"
-    video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"
-    marker_type = aruco.DICT_4X4_50
-    camera_matrix = np.array([
-        [537.0, 0.0, 640.0], 
-        [0.0, 537.0, 480.0], 
-        [0.0, 0.0, 1.0]], 
-        dtype=np.float32)
-    visual_odometry = VisualOdometry(video_url, marker_type, camera_matrix)
-    droneMavlink = DroneMavlink(drone_address, visual_odometry)
-    asyncio.run(droneMavlink.run())
+    asyncio.run(run_async())
