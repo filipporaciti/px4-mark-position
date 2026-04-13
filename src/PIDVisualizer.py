@@ -61,6 +61,6 @@ class PIDVisualizer:
                     pts_target.append([x_pos, y_tar])
                 
                 cv2.polylines(canvas, [np.array(pts_target, np.int32)], False, self.target_color, 1, cv2.LINE_AA)
-                cv2.polylines(canvas, [np.array(pts_val, np.int32)], False, self.colors[key], 2, cv2.LINE_AA)
+                cv2.polylines(canvas, [np.array(pts_val, np.int32)], False, self.colors[key], 1, cv2.LINE_AA)
 
         cv2.imshow(self.window_name, canvas)
