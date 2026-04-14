@@ -23,12 +23,27 @@ class DroneMavlink:
         self.OFFBOARD_Z_VEL_TOLERANCE = 0.01
         self.OFFBOARD_YAW_TOLERANCE = 0.1
 
+    async def start_mission(self, mission: dict):
+        await self.connect()
+        success = await self.start_offboard()
+        if not success:
+            return
+
+        await self.health_check()
+        await self.arm()
+
+        for target in mission["targets"]:
+            await self.move_to(target["north_m"], target["east_m"], target["down_m"], target["yaw_deg"])
+
+        await self.land()
+        await self.disarm()
+
     async def move_to(self, x: float, y: float, z: float, yaw: float):
         print(f"Moving to: x={x} y={y} z={z} yaw={yaw}")
         await self.drone.offboard.set_position_ned(PositionNedYaw(x, y, z, yaw))
 
         async for pos in self.drone.telemetry.position_velocity_ned():
-            print(f"Pos: {pos.position.north_m}, {pos.position.east_m}, {pos.position.down_m}, Vel: {pos.velocity.north_m_s}, {pos.velocity.east_m_s}, {pos.velocity.down_m_s}")
+            print(f"Pos: {pos.position.north_m: .4f}, {pos.position.east_m: .4f}, {pos.position.down_m: .4f} | Vel: {pos.velocity.north_m_s: .4f}, {pos.velocity.east_m_s: .4f}, {pos.velocity.down_m_s: .4f}")
             if abs(pos.position.north_m - x) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - y) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - z) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
                 break
 
