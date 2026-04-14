@@ -5,7 +5,8 @@ import cv2
 
 from mavsdk import System
 from mavsdk.mocap import VisionPositionEstimate, Covariance, AngleBody, PositionBody
-
+from mavsdk.offboard import OffboardError, PositionNedYaw
+from mavsdk.telemetry import LandedState
 
 class DroneMavlink:
 
@@ -15,6 +16,94 @@ class DroneMavlink:
 
         self.__old_coordinates = [0.0, 0.0, 0.0]
         self.__old_yaw = 0.0
+
+        self.OFFBOARD_XY_TOLERANCE = 0.1
+        self.OFFBOARD_Z_TOLERANCE = 0.05
+        self.OFFBOARD_XY_VEL_TOLERANCE = 0.05
+        self.OFFBOARD_Z_VEL_TOLERANCE = 0.01
+        self.OFFBOARD_YAW_TOLERANCE = 0.1
+
+    async def move_to(self, x: float, y: float, z: float, yaw: float):
+        print(f"Moving to: x={x} y={y} z={z} yaw={yaw}")
+        await self.drone.offboard.set_position_ned(PositionNedYaw(x, y, z, yaw))
+
+        async for pos in self.drone.telemetry.position_velocity_ned():
+            print(f"Pos: {pos.position.north_m}, {pos.position.east_m}, {pos.position.down_m}, Vel: {pos.velocity.north_m_s}, {pos.velocity.east_m_s}, {pos.velocity.down_m_s}")
+            if abs(pos.position.north_m - x) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - y) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - z) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
+                break
+
+        async for angle in self.drone.telemetry.attitude_euler():
+            print(f"Angle: {angle.yaw_deg}")
+            if abs(angle.yaw_deg - yaw) < self.OFFBOARD_YAW_TOLERANCE:
+                break
+        
+        await asyncio.sleep(1)
+
+
+    async def arm(self):
+        print("-- Arming")
+        await self.drone.action.arm()
+
+    async def disarm(self):
+        print("-- Disarming")
+        await self.drone.action.disarm()
+
+    async def land(self):
+        print("-- Landing")
+        await self.drone.action.land()
+
+        async for state in self.drone.telemetry.landed_state():
+            print(f"Landed State: {state}")
+            if state == LandedState.ON_GROUND:
+                break
+
+    async def start_offboard(self):
+        print("-- Setting initial setpoint")
+        await self.drone.offboard.set_position_ned(PositionNedYaw(0.0, 0.0, 0.0, 0.0))
+
+        print("-- Starting offboard")
+        try:
+            await self.drone.offboard.start()
+        except OffboardError as error:
+            print(f"Starting offboard mode failed with error code: {error._result.result}")
+            print("-- Disarming")
+            await self.drone.action.disarm()
+            return False
+        return True
+
+    async def health_check(self):
+
+        async for health in self.drone.telemetry.health():
+            print()
+            print("Chech: | ", end="")
+
+            if health.is_gyrometer_calibration_ok:
+                print("gyrometer | ", end="")
+            else:
+                continue
+            
+            if health.is_accelerometer_calibration_ok:
+                print("accelerometer | ", end="")
+            else:
+                continue
+
+            if health.is_magnetometer_calibration_ok:
+                print("magnetometer | ", end="")
+            else:
+                continue
+
+            if health.is_local_position_ok:
+                print("local position | ", end="")
+            else:
+                continue
+
+            if health.is_armable:
+                print("armable | ", end="")
+            else:
+                continue
+            
+            print()
+            break
 
     
     def get_covariance_matrix(self, dev_xy: float, dev_z: float, dev_yaw: float):
