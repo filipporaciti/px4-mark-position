@@ -166,7 +166,7 @@ class DroneMavlink:
 
         pitch, roll = await self.get_roll_pitch()
 
-        cov_matrix = self.get_covariance_matrix(0.05, coordinates[2] * 0.05, math.radians(1))
+        cov_matrix = self.get_covariance_matrix(coordinates[2] * 0.05, coordinates[2] * 0.05, math.radians(0.1))
 
         await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
             timestamp_us,
