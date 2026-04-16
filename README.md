@@ -22,7 +22,7 @@ Linux <br>
 ## Run
 1. Run PX4 + gazebo
 ```bash
-   ./px4_start.sh
+   ./px4_start.sh [drone mode]
 ```
 2. Upload params in PX4
 3. Run python script to send position from camera
@@ -33,3 +33,12 @@ Linux <br>
 ```bash
    python3 src/mission.py
 ```
+
+## Drone modes
+### sim_cam_up
+Drone: gz_x500_mono_cam_up <br>
+World: aruco_roof
+
+### sim_cam_down
+Drone: gz_x500_mono_cam_down <br>
+World: aruco_floor
