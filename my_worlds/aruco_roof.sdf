@@ -164,82 +164,82 @@
 
     <include>
       <uri>model://arucotag0</uri>
-      <pose>0 0 4.9 0 3.14159 0</pose>
+      <pose>0 0 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag1</uri>
-      <pose>0 2 4.9 0 3.14159 0</pose>
+      <pose>2 0 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag2</uri>
-      <pose>2 0 4.9 0 3.14159 0</pose>
+      <pose>4 0 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag3</uri>
-      <pose>2 2 4.9 0 3.14159 0</pose>
+      <pose>6 0 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag4</uri>
-      <pose>4 0 4.9 0 3.14159 0</pose>
+      <pose>0 2 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag5</uri>
-      <pose>0 4 4.9 0 3.14159 0</pose>
+      <pose>2 2 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag6</uri>
-      <pose>2 4 4.9 0 3.14159 0</pose>
+      <pose>4 2 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag7</uri>
-      <pose>4 2 4.9 0 3.14159 0</pose>
+      <pose>6 2 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag8</uri>
-      <pose>4 4 4.9 0 3.14159 0</pose>
+      <pose>0 4 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag9</uri>
-      <pose>6 0 4.9 0 3.14159 0</pose>
+      <pose>2 4 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag10</uri>
-      <pose>6 2 4.9 0 3.14159 0</pose>
+      <pose>4 4 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag11</uri>
-      <pose>6 4 4.9 0 3.14159 0</pose>
+      <pose>6 4 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag12</uri>
-      <pose>6 6 4.9 0 3.14159 0</pose>
+      <pose>0 6 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag13</uri>
-      <pose>0 6 4.9 0 3.14159 0</pose>
+      <pose>2 6 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag14</uri>
-      <pose>2 6 4.9 0 3.14159 0</pose>
+      <pose>4 6 4.9 3.14159 0 0</pose>
     </include>
 
     <include>
       <uri>model://arucotag15</uri>
-      <pose>4 6 4.9 0 3.14159 0</pose>
+      <pose>6 6 4.9 3.14159 0 0</pose>
     </include>
 
 
