@@ -7,7 +7,7 @@ import json
 
 class VisualOdometry:
 
-    def __init__(self, video_url: str, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, dist_coeff=np.zeros(5), marker_info_path="src/marker_info/aruco_sim.json"):
+    def __init__(self, video_url: str, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, dist_coeff=np.zeros(5), marker_info_path="src/marker_info/aruco_floor_sim.json"):
         self.video_url = video_url
         self.marker_type = marker_type
         self.show_video = show_video
