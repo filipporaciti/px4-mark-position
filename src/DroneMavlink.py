@@ -49,7 +49,7 @@ class DroneMavlink:
 
         async for angle in self.drone.telemetry.attitude_euler():
             print(f"Angle: {angle.yaw_deg}")
-            if abs(angle.yaw_deg - yaw) < self.OFFBOARD_YAW_TOLERANCE:
+            if abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) < self.OFFBOARD_YAW_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) > (360 - self.OFFBOARD_YAW_TOLERANCE):
                 break
         
         await asyncio.sleep(1)

@@ -7,22 +7,28 @@
             "yaw_deg": 0.0
         },
         {
-            "north_m": 3.0,
-            "east_m": 3.0,
-            "down_m": -1.5,
-            "yaw_deg": 2.0
-        },
-        {
-            "north_m": 5.0,
+            "north_m": 0.0,
             "east_m": 0.0,
             "down_m": -1.5,
-            "yaw_deg": 0.0
+            "yaw_deg": 90.0
         },
         {
             "north_m": 0.0,
-            "east_m": 4.5,
+            "east_m": 0.0,
             "down_m": -1.5,
-            "yaw_deg": 0.0
+            "yaw_deg": 180.0
+        },
+        {
+            "north_m": 0.0,
+            "east_m": 0.0,
+            "down_m": -1.5,
+            "yaw_deg": 270.0
+        },
+        {
+            "north_m": 0.0,
+            "east_m": 0.0,
+            "down_m": -1.5,
+            "yaw_deg": 294.6
         },
         {
             "north_m": 0.0,

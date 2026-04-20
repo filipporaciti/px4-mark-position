@@ -31,7 +31,7 @@ Linux <br>
 ```
 4. Run mission script
 ```bash
-   python3 src/mission.py
+   python3 src/mission.py [mission.json]
 ```
 
 ## Drone modes
@@ -42,3 +42,6 @@ World: aruco_roof
 ### sim_cam_down
 Drone: gz_x500_mono_cam_down <br>
 World: aruco_floor
+
+## Missions
+Folder: [src/missions](./src/missions/)
