@@ -32,6 +32,27 @@ class VisualOdometry:
         if not self.cap.isOpened():
             raise Exception(f"Error: Unable to connect to stream at {self.video_url}")
 
+    def get_covariance_matrix(self, coordinates, l):
+        dev_xy = coordinates[2]/self.camera_matrix[0, 0]
+        dev_z = coordinates[2]/l
+        dev_yaw = math.radians(0.1)
+
+        v_x = dev_xy**2
+        v_y = dev_xy**2
+        v_z = dev_z**2
+        v_roll = dev_yaw**2
+        v_pitch = dev_yaw**2
+        v_yaw = dev_yaw**2
+
+        cov_matrix = [
+            v_x, 0, 0, 0, 0, 0,
+                v_y, 0, 0, 0, 0,
+                    v_z, 0, 0, 0,
+                        v_roll, 0, 0,
+                            v_pitch, 0,
+                                v_yaw
+        ]
+        return cov_matrix
 
     def get_frame(self):
         _, frame = self.cap.read()
@@ -62,9 +83,19 @@ class VisualOdometry:
         if self.show_video:
             cv2.imshow('Gazebo Aruco Detection', frame)
 
+    def get_l(self, img_points):
+        c = img_points.reshape((4, 2))
+        (top_left, top_right, bottom_right, bottom_left) = c
+        side1 = np.linalg.norm(top_left - top_right)
+        side2 = np.linalg.norm(top_right - bottom_right)
+        side3 = np.linalg.norm(bottom_right - bottom_left)
+        side4 = np.linalg.norm(bottom_left - top_left)
+        l = (side1 + side2 + side3 + side4) / 4
+        return l
+
     def get_position(self, frame, corners, ids):
         if ids is None or corners is None or frame is None:
-            return None, None
+            return None, None, self.get_covariance_matrix([0, 0, 0], 1)
 
         for i in range(len(ids)):
 
@@ -90,9 +121,13 @@ class VisualOdometry:
 
                 self.print_text(frame, camera_world_pos, yaw)
 
-                return camera_world_pos.flatten(), yaw
+                camera_world_pos = camera_world_pos.flatten()
 
-        return None, None
+                l = self.get_l(corners[i][0])
+
+                return camera_world_pos, yaw, self.get_covariance_matrix(camera_world_pos, l)
+
+        return None, None, self.get_covariance_matrix([0, 0, 0], 1)
 
 if __name__ == "__main__":
     video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"

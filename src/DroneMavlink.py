@@ -120,25 +120,6 @@ class DroneMavlink:
             print()
             break
 
-    
-    def get_covariance_matrix(self, dev_xy: float, dev_z: float, dev_yaw: float):
-        v_x = dev_xy**2
-        v_y = dev_xy**2
-        v_z = dev_z**2
-        v_roll = dev_yaw**2
-        v_pitch = dev_yaw**2
-        v_yaw = dev_yaw**2
-
-        cov_matrix = [
-            v_x, 0, 0, 0, 0, 0,
-                v_y, 0, 0, 0, 0,
-                    v_z, 0, 0, 0,
-                        v_roll, 0, 0,
-                            v_pitch, 0,
-                                v_yaw
-        ]
-        return cov_matrix
-
     async def get_roll_pitch(self):
         roll = 0.0
         pitch = 0.0
@@ -157,7 +138,7 @@ class DroneMavlink:
                 print("-- Connected to drone!")
                 break
 
-    async def update_position(self, timestamp_us, coordinates, yaw):
+    async def update_position(self, timestamp_us, coordinates, yaw, cov_matrix):
         if coordinates is None or yaw is None:
             coordinates = self.__old_coordinates
             yaw = self.__old_yaw
@@ -165,8 +146,6 @@ class DroneMavlink:
         self.__old_yaw = yaw
 
         pitch, roll = await self.get_roll_pitch()
-
-        cov_matrix = self.get_covariance_matrix(coordinates[2] * 0.05, coordinates[2] * 0.05, math.radians(0.1))
 
         await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
             timestamp_us,
