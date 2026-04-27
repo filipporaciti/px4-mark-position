@@ -29,12 +29,12 @@ async def run_async():
 
         frame = visual_odometry.get_frame()
         ids, corners = visual_odometry.process_frame(frame)
-        coordinates, yaw, cov_matrix = visual_odometry.get_position(frame, corners, ids)
+        coordinates, angles, cov_matrix = visual_odometry.get_position(frame, corners, ids)
         
-        if coordinates is not None and yaw is not None:
+        if coordinates is not None and angles is not None:
             pid_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=0.0, target_y=0.0, target_z=-2.0)
 
-        await droneMavlink.update_position(timestamp_us, coordinates, yaw, cov_matrix)
+        await droneMavlink.update_position(timestamp_us, coordinates, angles, cov_matrix)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

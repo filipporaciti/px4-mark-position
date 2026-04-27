@@ -15,7 +15,7 @@ class DroneMavlink:
         self.drone = System()
 
         self.__old_coordinates = [0.0, 0.0, 0.0]
-        self.__old_yaw = 0.0
+        self.__old_angles = [0.0, 0.0, 0.0]
 
         self.OFFBOARD_XY_TOLERANCE = 0.1
         self.OFFBOARD_Z_TOLERANCE = 0.05
@@ -119,15 +119,6 @@ class DroneMavlink:
             
             print()
             break
-
-    async def get_roll_pitch(self):
-        roll = 0.0
-        pitch = 0.0
-        async for attitude in self.drone.telemetry.attitude_euler():
-            roll = math.radians(attitude.roll_deg)
-            pitch = math.radians(attitude.pitch_deg)
-            break
-        return pitch, roll
     
     async def connect(self):
         await self.drone.connect(system_address=self.drone_address)
@@ -138,19 +129,17 @@ class DroneMavlink:
                 print("-- Connected to drone!")
                 break
 
-    async def update_position(self, timestamp_us, coordinates, yaw, cov_matrix):
-        if coordinates is None or yaw is None:
+    async def update_position(self, timestamp_us, coordinates, angles, cov_matrix):
+        if coordinates is None or angles is None:
             coordinates = self.__old_coordinates
-            yaw = self.__old_yaw
+            angles = self.__old_angles
         self.__old_coordinates = coordinates
-        self.__old_yaw = yaw
-
-        pitch, roll = await self.get_roll_pitch()
+        self.__old_angles = angles
 
         await self.drone.mocap.set_vision_position_estimate(VisionPositionEstimate(
             timestamp_us,
             PositionBody(coordinates[0], coordinates[1], coordinates[2]),
-            AngleBody(roll, pitch, yaw),
+            AngleBody(angles[0], angles[1], angles[2]),
             Covariance(cov_matrix)
             ))         
 
@@ -165,9 +154,10 @@ if __name__ == "__main__":
             timestamp_us = int(time.time() * 1e6) # Seconds to microseconds
 
             coordinates = [0.0, 0.0, 0.0]
-            yaw = 0.0
+            angles = [0.0, 0.0, 0.0]
+            cov_matrix = [0.0] * 21
 
-            await droneMavlink.update_position(timestamp_us, coordinates, yaw)
+            await droneMavlink.update_position(timestamp_us, coordinates, angles, cov_matrix)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

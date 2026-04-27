@@ -73,12 +73,14 @@ class VisualOdometry:
         
         return ids, corners
     
-    def print_text(self, frame, position, yaw):
+    def print_text(self, frame, position, angle):
         cv2.putText(frame, f"X: {position[0][0]:.2f} m", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
         cv2.putText(frame, f"Y: {position[1][0]:.2f} m", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
         cv2.putText(frame, f"Z: {position[2][0]:.2f} m", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
 
-        cv2.putText(frame, f"Yaw: {yaw:.1f} rad", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        cv2.putText(frame, f"Roll: {angle[0]:.2f} rad", (10, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        cv2.putText(frame, f"Pitch: {angle[1]:.2f} rad", (10, 170), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
+        cv2.putText(frame, f"Yaw: {angle[2]:.2f} rad", (10, 200), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 0), 2)
         
         if self.show_video:
             cv2.imshow('Gazebo Aruco Detection', frame)
@@ -117,15 +119,19 @@ class VisualOdometry:
 
                 camera_world_pos = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]]) @ camera_world_pos
 
+                roll = math.atan2(-R[2, 1], -R[2, 2])
+                pitch = math.atan2(-R[2, 0], math.sqrt(R[2, 1]**2 + R[2, 2]**2))
                 yaw = -math.atan2(R[1, 0], R[0, 0])
 
-                self.print_text(frame, camera_world_pos, yaw)
+                camera_world_angle = (roll, pitch, yaw)
+
+                self.print_text(frame, camera_world_pos, camera_world_angle)
 
                 camera_world_pos = camera_world_pos.flatten()
 
                 l = self.get_l(corners[i][0])
 
-                return camera_world_pos, yaw, self.get_covariance_matrix(camera_world_pos, l)
+                return camera_world_pos, camera_world_angle, self.get_covariance_matrix(camera_world_pos, l)
 
         return None, None, self.get_covariance_matrix([0, 0, 0], 1)
 
@@ -143,8 +149,9 @@ if __name__ == "__main__":
     while True:
         frame = vo.get_frame()
         ids, corners = vo.process_frame(frame)
-        coordinates, yaw = vo.get_position(frame, corners, ids)
-        if coordinates is not None and yaw is not None:
-            print(f"Estimated Position: X={coordinates[0]:.2f} m, Y={coordinates[1]:.2f} m, Z={coordinates[2]:.2f} m", f"Yaw={yaw:.1f} rad")
+        coordinates, angle = vo.get_position(frame, corners, ids)
+        if coordinates is not None and angle is not None:
+            print(f"Estimated Position: X={coordinates[0]:.2f} m, Y={coordinates[1]:.2f} m, Z={coordinates[2]:.2f} m")
+            print(f"Estimated Orientation: Roll={angle[0]:.1f} rad, Pitch={angle[1]:.1f} rad, Yaw={angle[2]:.1f} rad")
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
