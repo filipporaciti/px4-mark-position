@@ -29,6 +29,8 @@ class VisualOdometry:
         self.aruco_params = aruco.DetectorParameters()
         self.detector = aruco.ArucoDetector(self.aruco_dict, self.aruco_params)
 
+        self.ENU_TO_NED = self.roll_y(math.pi) @ self.roll_z(math.pi/2)
+
         if not self.cap.isOpened():
             raise Exception(f"Error: Unable to connect to stream at {self.video_url}")
 
@@ -94,6 +96,27 @@ class VisualOdometry:
         side4 = np.linalg.norm(bottom_left - top_left)
         l = (side1 + side2 + side3 + side4) / 4
         return l
+    
+    def roll_x(self, rad):
+        c = math.cos(rad)
+        s = math.sin(rad)
+        return np.array([[1, 0, 0], 
+                         [0, c, -s], 
+                         [0, s, c]])
+    
+    def roll_y(self, rad):
+        c = math.cos(rad)
+        s = math.sin(rad)
+        return np.array([[c, 0, s], 
+                         [0, 1, 0], 
+                         [-s, 0, c]])
+    
+    def roll_z(self, rad):
+        c = math.cos(rad)
+        s = math.sin(rad)
+        return np.array([[c, -s, 0], 
+                         [s, c, 0], 
+                         [0, 0, 1]])
 
     def get_position(self, frame, corners, ids):
         if ids is None or corners is None or frame is None:
@@ -108,20 +131,25 @@ class VisualOdometry:
                 cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeff, rvec, tvec, 0.05)
 
                 R, _ = cv2.Rodrigues(rvec)
-                camera_world_pos = -R.T @ tvec
-
+                R = R @ self.ENU_TO_NED
+                
                 if str(ids[i][0]) not in self.marker_info["position"]:
                     print(f"Warning: Marker ID {ids[i][0]} not found in marker_info. Skipping position adjustment.")
                     continue
 
-                camera_world_pos[0] = self.marker_info["position"][str(ids[i][0])]["x"] + camera_world_pos[0]
-                camera_world_pos[1] = self.marker_info["position"][str(ids[i][0])]["y"] + camera_world_pos[1]
+                marker_tvec = np.array([[self.marker_info["position"][str(ids[i][0])]["x"]], 
+                                        [self.marker_info["position"][str(ids[i][0])]["y"]], 
+                                        [self.marker_info["position"][str(ids[i][0])]["z"]]])
 
-                camera_world_pos = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]]) @ camera_world_pos
+                camera_world_pos = (-R.T @ tvec) + (self.ENU_TO_NED @ marker_tvec)
 
-                roll = math.atan2(-R[2, 1], -R[2, 2])
-                pitch = math.atan2(-R[2, 0], math.sqrt(R[2, 1]**2 + R[2, 2]**2))
-                yaw = -math.atan2(R[1, 0], R[0, 0])
+                roll = np.arctan2(R.T[2,1], R.T[2,2])
+                pitch = np.arctan2(-R.T[2,0], np.sqrt(R.T[0,0]**2 +  R.T[1,0]**2))
+                yaw = np.arctan2(R.T[1,0], R.T[0,0])
+
+                # ENU to NED angle conversion
+                yaw = (yaw + math.pi/2) % (2 * math.pi) - math.pi
+                roll, pitch = -pitch, roll
 
                 camera_world_angle = (roll, pitch, yaw)
 
