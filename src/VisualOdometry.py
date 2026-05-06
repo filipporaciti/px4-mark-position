@@ -37,13 +37,15 @@ class VisualOdometry:
     def get_covariance_matrix(self, coordinates, l):
         dev_xy = coordinates[2]/self.camera_matrix[0, 0]
         dev_z = coordinates[2]/l
-        dev_yaw = math.radians(0.1)
+        dev_roll = 1/self.camera_matrix[0, 0]
+        dev_pitch = 1/self.camera_matrix[1, 1]
+        dev_yaw = math.sqrt(2)/l
 
         v_x = dev_xy**2
         v_y = dev_xy**2
         v_z = dev_z**2
-        v_roll = dev_yaw**2
-        v_pitch = dev_yaw**2
+        v_roll = dev_roll**2
+        v_pitch = dev_pitch**2
         v_yaw = dev_yaw**2
 
         cov_matrix = [
