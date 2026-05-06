@@ -143,14 +143,10 @@ class VisualOdometry:
 
                 camera_world_pos = (-R.T @ tvec) + (self.ENU_TO_NED @ marker_tvec)
 
-                roll = np.arctan2(R.T[2,1], R.T[2,2])
-                pitch = np.arctan2(-R.T[2,0], np.sqrt(R.T[0,0]**2 +  R.T[1,0]**2))
-                yaw = np.arctan2(R.T[1,0], R.T[0,0])
 
-                # ENU to NED angle conversion
-                yaw = (yaw + math.pi/2) % (2 * math.pi) - math.pi
-                roll, pitch = -pitch, roll
-
+                roll = math.atan2(-R.T[1, 2], R.T[1, 0])
+                pitch = math.atan2(R.T[0, 2], -R.T[0, 1])
+                yaw = math.atan2(-R.T[0, 0], R.T[1, 0])
                 camera_world_angle = (roll, pitch, yaw)
 
                 self.print_text(frame, camera_world_pos, camera_world_angle)
