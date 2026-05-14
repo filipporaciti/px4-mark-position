@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 
-class PIDVisualizer:
-    def __init__(self, width=1500, height=400, window_name="PID Telemetry"):
+class TelemetryVisualizer:
+    def __init__(self, width=1500, height=400, window_name="Telemetry"):
         self.width = width
         self.height = height
         self.window_name = window_name

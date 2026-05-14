@@ -5,7 +5,7 @@ import time
 import asyncio
 
 from VisualOdometry import VisualOdometry
-from PIDVisualizer import PIDVisualizer
+from TelemetryVisualizer import TelemetryVisualizer
 from DroneMavlink import DroneMavlink
 
 
@@ -18,7 +18,7 @@ camera_matrix = np.array([
     [0.0, 0.0, 1.0]], 
     dtype=np.float32)
 visual_odometry = VisualOdometry(video_url, marker_type, camera_matrix)
-pid_visualizer = PIDVisualizer()
+telemetry_visualizer = TelemetryVisualizer()
 droneMavlink = DroneMavlink(drone_address)
 
 
@@ -32,7 +32,7 @@ async def run_async():
         coordinates, angles, cov_matrix = visual_odometry.get_position(frame, corners, ids)
         
         if coordinates is not None and angles is not None:
-            pid_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=0.0, target_y=0.0, target_z=-2.0)
+            telemetry_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=0.0, target_y=0.0, target_z=-2.0)
 
         await droneMavlink.update_position(timestamp_us, coordinates, angles, cov_matrix)
 
