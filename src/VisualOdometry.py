@@ -132,8 +132,8 @@ class VisualOdometry:
             if success:
                 cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeff, rvec, tvec, 0.05)
 
-                R, _ = cv2.Rodrigues(rvec)
-                R = R @ self.ENU_TO_NED
+                r, _ = cv2.Rodrigues(rvec)
+                r = r @ self.ENU_TO_NED
                 
                 if str(ids[i][0]) not in self.marker_info["position"]:
                     print(f"Warning: Marker ID {ids[i][0]} not found in marker_info. Skipping position adjustment.")
@@ -143,12 +143,12 @@ class VisualOdometry:
                                         [self.marker_info["position"][str(ids[i][0])]["y"]], 
                                         [self.marker_info["position"][str(ids[i][0])]["z"]]])
 
-                camera_world_pos = (-R.T @ tvec) + (self.ENU_TO_NED @ marker_tvec)
+                camera_world_pos = (-r.T @ tvec) + (self.ENU_TO_NED @ marker_tvec)
 
 
-                roll = math.atan2(-R.T[1, 2], R.T[1, 0])
-                pitch = math.atan2(R.T[0, 2], -R.T[0, 1])
-                yaw = math.atan2(-R.T[0, 0], R.T[1, 0])
+                roll = math.atan2(-r.T[1, 2], r.T[1, 0])
+                pitch = math.atan2(r.T[0, 2], -r.T[0, 1])
+                yaw = math.atan2(-r.T[0, 0], r.T[1, 0])
                 camera_world_angle = (roll, pitch, yaw)
 
                 self.print_text(frame, camera_world_pos, camera_world_angle)
