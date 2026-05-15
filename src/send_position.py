@@ -25,7 +25,6 @@ droneMavlink = DroneMavlink(drone_address)
 async def run_async():
     await droneMavlink.connect()
     while True:
-        timestamp_us = int(time.time() * 1e6) # Seconds to microseconds
 
         frame = visual_odometry.get_frame()
         ids, corners = visual_odometry.process_frame(frame)
@@ -33,6 +32,8 @@ async def run_async():
         
         if coordinates is not None and angles is not None:
             telemetry_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=0.0, target_y=0.0, target_z=-2.0)
+
+        timestamp_us = int(time.time() * 1e6) # Seconds to microseconds
 
         await droneMavlink.update_position(timestamp_us, coordinates, angles, cov_matrix)
 
