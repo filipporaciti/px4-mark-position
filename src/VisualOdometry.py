@@ -145,9 +145,8 @@ class VisualOdometry:
 
                 camera_world_pos = (-r.T @ tvec) + (self.ENU_TO_NED @ marker_tvec)
 
-
-                roll = math.atan2(-r.T[1, 2], r.T[1, 0])
-                pitch = math.atan2(r.T[0, 2], -r.T[0, 1])
+                roll = math.asin(r.T[2, 0])
+                pitch = math.atan2(r.T[2, 1], r.T[2, 2])
                 yaw = math.atan2(-r.T[0, 0], r.T[1, 0])
                 camera_world_angle = (roll, pitch, yaw)
 
