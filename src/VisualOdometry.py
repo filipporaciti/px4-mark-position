@@ -174,7 +174,7 @@ if __name__ == "__main__":
     while True:
         frame = vo.get_frame()
         ids, corners = vo.process_frame(frame)
-        coordinates, angle = vo.get_position(frame, corners, ids)
+        coordinates, angle, _ = vo.get_position(frame, corners, ids)
         if coordinates is not None and angle is not None:
             print(f"Estimated Position: X={coordinates[0]:.2f} m, Y={coordinates[1]:.2f} m, Z={coordinates[2]:.2f} m")
             print(f"Estimated Orientation: Roll={angle[0]:.1f} rad, Pitch={angle[1]:.1f} rad, Yaw={angle[2]:.1f} rad")
