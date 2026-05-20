@@ -33,7 +33,8 @@ class DroneMavlink:
         await self.arm()
 
         for target in mission["targets"]:
-            await self.move_to(target["north_m"], target["east_m"], target["down_m"], target["yaw_deg"])
+            yaw_deg = target.get("yaw_deg", 0.0)
+            await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg)
 
         await self.land()
         await self.disarm()
