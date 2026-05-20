@@ -34,12 +34,13 @@ class DroneMavlink:
 
         for target in mission["targets"]:
             yaw_deg = target.get("yaw_deg", 0.0)
-            await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg)
+            hover_time_ms = target.get("hover_time_ms", 1000)
+            await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg, hover_time_ms)
 
         await self.land()
         await self.disarm()
 
-    async def move_to(self, x: float, y: float, z: float, yaw: float):
+    async def move_to(self, x: float, y: float, z: float, yaw: float, hover_time_ms: int):
         print(f"Moving to: x={x} y={y} z={z} yaw={yaw}")
         await self.drone.offboard.set_position_ned(PositionNedYaw(x, y, z, yaw))
 
@@ -53,7 +54,7 @@ class DroneMavlink:
             if abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) < self.OFFBOARD_YAW_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) > (360 - self.OFFBOARD_YAW_TOLERANCE):
                 break
         
-        await asyncio.sleep(1)
+        await asyncio.sleep(hover_time_ms / 1000)
 
 
     async def arm(self):
