@@ -1,8 +1,8 @@
 # px4-mark-position
 
-## Description
+Implementation of PX4 drone in GPS denied environment that uses aruco markers to visual estimate local position.
 
-# 🔧 Setup & Build
+## Build
 MacOS
 ```bash
    ./setup/macos.sh
@@ -35,10 +35,6 @@ Linux <br>
 ```
 
 ## Drone modes
-### sim_cam_up
-Drone: gz_x500_mono_cam_up <br>
-World: aruco_roof
-
 ### sim_cam_down
 Drone: gz_x500_mono_cam_down <br>
 World: aruco_floor
