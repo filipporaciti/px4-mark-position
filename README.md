@@ -1,6 +1,6 @@
 # px4-mark-position
 
-Implementation of PX4 drone in GPS denial environment that uses aruco markers to visual estimate local position.
+Implementation of PX4 drone in GPS denied environment that uses aruco markers to visual estimate local position.
 
 ## Build
 MacOS
