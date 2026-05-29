@@ -2,10 +2,9 @@ import cv2
 import numpy as np
 
 class TelemetryVisualizer:
-    def __init__(self, width=1500, height=400, window_name="Telemetry"):
+    def __init__(self, width=1500, height=400, show_video: bool = True):
         self.width = width
         self.height = height
-        self.window_name = window_name
         self.plot_h = height // 3
         self.max_points = width - 60
         
@@ -14,9 +13,13 @@ class TelemetryVisualizer:
         self.colors = {'X': (0, 0, 255), 'Y': (0, 255, 0), 'Z': (255, 100, 0)}
         self.target_color = (0, 255, 255) 
 
+        self.show_video = show_video
         self._render()
 
     def update(self, val_x, val_y, val_z, target_x=0, target_y=0, target_z=0):
+        if not self.show_video:
+            return
+        
         targets = [target_x, target_y, target_z]
         values = [val_x, val_y, val_z]
         
@@ -28,6 +31,9 @@ class TelemetryVisualizer:
         self._render()
 
     def _render(self):
+        if not self.show_video:
+            return
+        
         canvas = np.ones((self.height, self.width, 3), dtype=np.uint8) * 20
         
         for i, key in enumerate(['X', 'Y', 'Z']):
@@ -63,4 +69,4 @@ class TelemetryVisualizer:
                 cv2.polylines(canvas, [np.array(pts_target, np.int32)], False, self.target_color, 1, cv2.LINE_AA)
                 cv2.polylines(canvas, [np.array(pts_val, np.int32)], False, self.colors[key], 1, cv2.LINE_AA)
 
-        cv2.imshow(self.window_name, canvas)
+        cv2.imshow("Telemetry", canvas)
