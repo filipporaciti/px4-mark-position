@@ -27,11 +27,11 @@ Linux <br>
 2. Upload params in PX4
 3. Run python script to send position from camera
 ```bash
-   python3 src/send_position.py
+   python3 src/sim_send_position.py
 ```
 4. Run mission script
 ```bash
-   python3 src/mission.py [mission.json]
+   python3 src/sim_mission.py [mission.json]
 ```
 
 ## Drone modes
