@@ -7,9 +7,10 @@ import json
 
 class VisualOdometry:
 
-    def __init__(self, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, dist_coeff=np.zeros(5), marker_info_path="src/marker_info/aruco_floor_sim.json"):
+    def __init__(self, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, show_terminal: bool = True, dist_coeff=np.zeros(5), marker_info_path="src/marker_info/aruco_floor_sim.json"):
         self.marker_type = marker_type
         self.show_video = show_video
+        self.show_terminal = show_terminal
         self.camera_matrix = camera_matrix
         self.dist_coeff = dist_coeff
         self.marker_info = json.load(open(marker_info_path, "r"))
@@ -125,7 +126,8 @@ class VisualOdometry:
                 r = r @ self.ENU_TO_NED
                 
                 if str(ids[i][0]) not in self.marker_info["position"]:
-                    print(f"Warning: Marker ID {ids[i][0]} not found in marker_info. Skipping position adjustment.")
+                    if self.show_terminal:
+                        print(f"Warning: Marker ID {ids[i][0]} not found in marker_info. Skipping position adjustment.")
                     continue
 
                 marker_tvec = np.array([[self.marker_info["position"][str(ids[i][0])]["x"]], 
@@ -144,8 +146,15 @@ class VisualOdometry:
                 camera_world_pos = camera_world_pos.flatten()
 
                 l = self.get_l(corners[i][0])
+                cov_matrix = self.get_covariance_matrix(camera_world_pos, l)
 
-                return camera_world_pos, camera_world_angle, self.get_covariance_matrix(camera_world_pos, l)
+                if self.show_terminal:
+                    print(f"Marker ID: {ids[i][0]}")
+                    print(f"Estimated Position: X={camera_world_pos[0]:.2f} m, Y={camera_world_pos[1]:.2f} m, Z={camera_world_pos[2]:.2f} m")
+                    print(f"Estimated Orientation: Roll={camera_world_angle[0]:.2f} rad, Pitch={camera_world_angle[1]:.2f} rad, Yaw={camera_world_angle[2]:.2f} rad")
+                    print("--------------------------------------------------")
+
+                return camera_world_pos, camera_world_angle, cov_matrix
 
         return None, None, self.get_covariance_matrix([0, 0, 0], 1)
 
