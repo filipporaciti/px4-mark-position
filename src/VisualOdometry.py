@@ -7,8 +7,7 @@ import json
 
 class VisualOdometry:
 
-    def __init__(self, video_url: str, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, dist_coeff=np.zeros(5), marker_info_path="src/marker_info/aruco_floor_sim.json"):
-        self.video_url = video_url
+    def __init__(self, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, dist_coeff=np.zeros(5), marker_info_path="src/marker_info/aruco_floor_sim.json"):
         self.marker_type = marker_type
         self.show_video = show_video
         self.camera_matrix = camera_matrix
@@ -22,17 +21,11 @@ class VisualOdometry:
             [-self.marker_info["marker_length"]/2, -self.marker_info["marker_length"]/2, 0]
         ], dtype=np.float32)
 
-        self.cap = cv2.VideoCapture(self.video_url, cv2.CAP_FFMPEG)
-        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-
         self.aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
         self.aruco_params = aruco.DetectorParameters()
         self.detector = aruco.ArucoDetector(self.aruco_dict, self.aruco_params)
 
         self.ENU_TO_NED = self.roll_y(math.pi) @ self.roll_z(math.pi/2)
-
-        if not self.cap.isOpened():
-            raise Exception(f"Error: Unable to connect to stream at {self.video_url}")
 
     def get_covariance_matrix(self, coordinates, l):
         dev_xy = coordinates[2]/self.camera_matrix[0, 0]
@@ -58,11 +51,7 @@ class VisualOdometry:
         ]
         return cov_matrix
 
-    def get_frame(self):
-        _, frame = self.cap.read()
-        return frame
-
-    def process_frame(self, frame):
+    def process_frame(self, frame: np.ndarray):
         if frame is None:
             return None, None
         

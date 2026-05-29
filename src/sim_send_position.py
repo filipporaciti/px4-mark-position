@@ -17,16 +17,22 @@ camera_matrix = np.array([
     [0.0, 537.0, 480.0], 
     [0.0, 0.0, 1.0]], 
     dtype=np.float32)
-visual_odometry = VisualOdometry(video_url, marker_type, camera_matrix)
+visual_odometry = VisualOdometry(marker_type, camera_matrix)
 telemetry_visualizer = TelemetryVisualizer()
 droneMavlink = DroneMavlink(drone_address)
+
+cap = cv2.VideoCapture(video_url, cv2.CAP_FFMPEG)
+cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+
+if not cap.isOpened():
+    raise Exception(f"Error: Unable to connect to stream at {video_url}")
 
 
 async def run_async():
     await droneMavlink.connect()
     while True:
 
-        frame = visual_odometry.get_frame()
+        _, frame = cap.read()
         ids, corners = visual_odometry.process_frame(frame)
         coordinates, angles, cov_matrix = visual_odometry.get_position(frame, corners, ids)
         
