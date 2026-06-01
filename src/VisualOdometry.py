@@ -52,12 +52,14 @@ class VisualOdometry:
         ]
         return cov_matrix
 
-    def process_frame(self, frame: np.ndarray):
+    def process_frame(self, frame: np.ndarray, grayConvert: bool = True):
         if frame is None:
             return None, None
         
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        corners, ids, _ = self.detector.detectMarkers(gray)
+        if grayConvert:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        corners, ids, _ = self.detector.detectMarkers(frame)
 
         if ids is not None:
             aruco.drawDetectedMarkers(frame, corners, ids)
