@@ -118,6 +118,7 @@ class VisualOdometry:
 
         for i in range(len(ids)):
 
+            marker_id = ids[i]
             img_points = corners[i][0]
             success, rvec, tvec = cv2.solvePnP(self.obj_points, img_points, self.camera_matrix, self.dist_coeff)
 
@@ -127,14 +128,14 @@ class VisualOdometry:
                 r, _ = cv2.Rodrigues(rvec)
                 r = r @ self.ENU_TO_NED
                 
-                if str(ids[i][0]) not in self.marker_info["position"]:
+                if str(marker_id) not in self.marker_info["position"]:
                     if self.show_terminal:
-                        print(f"Warning: Marker ID {ids[i][0]} not found in marker_info. Skipping position adjustment.")
+                        print(f"Warning: Marker ID {marker_id} not found in marker_info. Skipping position adjustment.")
                     continue
 
-                marker_tvec = np.array([[self.marker_info["position"][str(ids[i][0])]["x"]], 
-                                        [self.marker_info["position"][str(ids[i][0])]["y"]], 
-                                        [self.marker_info["position"][str(ids[i][0])]["z"]]])
+                marker_tvec = np.array([[self.marker_info["position"][str(marker_id)]["x"]], 
+                                        [self.marker_info["position"][str(marker_id)]["y"]], 
+                                        [self.marker_info["position"][str(marker_id)]["z"]]])
 
                 camera_world_pos = (-r.T @ tvec) + (self.ENU_TO_NED @ marker_tvec)
 
@@ -151,7 +152,7 @@ class VisualOdometry:
                 cov_matrix = self.get_covariance_matrix(camera_world_pos, l)
 
                 if self.show_terminal:
-                    print(f"Marker ID: {ids[i][0]}")
+                    print(f"Marker ID: {marker_id}")
                     print(f"Estimated Position: X={camera_world_pos[0]:.2f} m, Y={camera_world_pos[1]:.2f} m, Z={camera_world_pos[2]:.2f} m")
                     print(f"Estimated Orientation: Roll={camera_world_angle[0]:.2f} rad, Pitch={camera_world_angle[1]:.2f} rad, Yaw={camera_world_angle[2]:.2f} rad")
                     print("--------------------------------------------------")
