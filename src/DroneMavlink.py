@@ -135,6 +135,7 @@ class DroneMavlink:
         if coordinates is None or angles is None:
             coordinates = self.__old_coordinates
             angles = self.__old_angles
+            cov_matrix = [float('nan')] * 21
         self.__old_coordinates = coordinates
         self.__old_angles = angles
 

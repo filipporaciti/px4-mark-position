@@ -114,7 +114,7 @@ class VisualOdometry:
 
     def get_position(self, frame, corners, ids):
         if ids is None or corners is None or frame is None:
-            return None, None, self.get_covariance_matrix([0, 0, 0], 1)
+            return None, None, [float('nan')] * 21
 
         for i in range(len(ids)):
 
@@ -159,7 +159,7 @@ class VisualOdometry:
 
                 return camera_world_pos, camera_world_angle, cov_matrix
 
-        return None, None, self.get_covariance_matrix([0, 0, 0], 1)
+        return None, None, [float('nan')] * 21
 
 if __name__ == "__main__":
     video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"
