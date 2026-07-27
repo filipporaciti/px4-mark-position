@@ -15,11 +15,12 @@ class VisualOdometry:
         self.dist_coeff = dist_coeff
         self.marker_info = json.load(open(marker_info_path, "r"))
 
+        l = self.marker_info["marker_length"]
         self.obj_points = np.array([
-            [-self.marker_info["marker_length"]/2,  self.marker_info["marker_length"]/2, 0],
-            [ self.marker_info["marker_length"]/2,  self.marker_info["marker_length"]/2, 0],
-            [ self.marker_info["marker_length"]/2, -self.marker_info["marker_length"]/2, 0],
-            [-self.marker_info["marker_length"]/2, -self.marker_info["marker_length"]/2, 0]
+            [-l/2,  l/2, 0],
+            [ l/2,  l/2, 0],
+            [ l/2, -l/2, 0],
+            [-l/2, -l/2, 0]
         ], dtype=np.float32)
 
         self.aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)

@@ -23,6 +23,9 @@ class DroneMavlink:
         self.OFFBOARD_Z_VEL_TOLERANCE = 0.01
         self.OFFBOARD_YAW_TOLERANCE = 0.1
 
+        self.DEFAULT_HOVER_TIME_MS = 1000
+        self.DEFAULR_YAW_DEG = 0.0
+
     async def start_mission(self, mission: dict):
         await self.connect()
         success = await self.start_offboard()
@@ -33,8 +36,8 @@ class DroneMavlink:
         await self.arm()
 
         for target in mission["targets"]:
-            yaw_deg = target.get("yaw_deg", 0.0)
-            hover_time_ms = target.get("hover_time_ms", 1000)
+            yaw_deg = target.get("yaw_deg", self.DEFAULR_YAW_DEG)
+            hover_time_ms = target.get("hover_time_ms", self.DEFAULT_HOVER_TIME_MS)
             await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg, hover_time_ms)
 
         await self.land()

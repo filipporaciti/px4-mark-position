@@ -10,7 +10,8 @@ from DroneMavlink import DroneMavlink
 
 WIDTH = 640
 HEIGHT = 480
-FOCAL_LENGTH = (WIDTH/2)/math.tan(math.radians(31.1))
+FOV = 62.2      # degrees
+FOCAL_LENGTH = (WIDTH/2)/math.tan(math.radians(FOV/2))
 
 drone_address = "serial:///dev/serial0:921600"
 marker_type = aruco.DICT_4X4_50

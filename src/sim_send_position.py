@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 from cv2 import aruco
 import cv2
@@ -9,12 +11,21 @@ from TelemetryVisualizer import TelemetryVisualizer
 from DroneMavlink import DroneMavlink
 
 
+WIDTH = 1280
+HEIGHT = 960
+FOV = 100       # degrees
+FOCAL_LENGTH = (WIDTH/2)/math.tan(math.radians(FOV/2))
+
+TEL_TARGET_X = 0.0
+TEL_TARGET_Y = 0.0
+TEL_TARGET_Z = -2.0
+
 drone_address = "udpin://0.0.0.0:14540"
 video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"
 marker_type = aruco.DICT_4X4_50
 camera_matrix = np.array([
-    [537.0, 0.0, 640.0], 
-    [0.0, 537.0, 480.0], 
+    [FOCAL_LENGTH, 0.0, (WIDTH/2)],
+    [0.0, FOCAL_LENGTH, (HEIGHT/2)], 
     [0.0, 0.0, 1.0]], 
     dtype=np.float32)
 visual_odometry = VisualOdometry(marker_type, camera_matrix)
@@ -37,7 +48,7 @@ async def run_async():
         coordinates, angles, cov_matrix = visual_odometry.get_position(frame, corners, ids)
         
         if coordinates is not None and angles is not None:
-            telemetry_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=0.0, target_y=0.0, target_z=-2.0)
+            telemetry_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=TEL_TARGET_X, target_y=TEL_TARGET_Y, target_z=TEL_TARGET_Z)
 
         timestamp_us = int(time.time() * 1e6) # Seconds to microseconds
 
