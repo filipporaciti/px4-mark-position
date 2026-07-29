@@ -1,4 +1,4 @@
-opencv-python-headless
-mavsdk
-psutil
-picamera2
+opencv-python-headless==5.0.0.93
+mavsdk==3.17.2
+psutil==7.2.2
+picamera2==0.3.36

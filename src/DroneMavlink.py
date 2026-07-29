@@ -146,7 +146,8 @@ class DroneMavlink:
             timestamp_us,
             PositionBody(coordinates[0], coordinates[1], coordinates[2]),
             AngleBody(angles[0], angles[1], angles[2]),
-            Covariance(cov_matrix)
+            Covariance(cov_matrix),
+            0
             ))         
 
 
