@@ -31,7 +31,7 @@ Linux <br>
 ```
 4. Run mission script
 ```bash
-   python3 src/sim_mission.py [mission.json]
+   python3 src/mission.py [mission.json]
 ```
 
 ## Drone modes
