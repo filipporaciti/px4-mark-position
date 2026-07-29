@@ -8,7 +8,6 @@ import json
 class VisualOdometry:
 
     def __init__(self, marker_type: int, camera_matrix: np.ndarray, show_video: bool = True, show_terminal: bool = True, dist_coeff=np.zeros(5), marker_info_path="src/marker_info/aruco_floor_sim.json"):
-        self.marker_type = marker_type
         self.show_video = show_video
         self.show_terminal = show_terminal
         self.camera_matrix = camera_matrix
@@ -23,7 +22,7 @@ class VisualOdometry:
             [-l/2, -l/2, 0]
         ], dtype=np.float32)
 
-        self.aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_4X4_50)
+        self.aruco_dict = aruco.getPredefinedDictionary(marker_type)
         self.aruco_params = aruco.DetectorParameters()
         self.detector = aruco.ArucoDetector(self.aruco_dict, self.aruco_params)
 
