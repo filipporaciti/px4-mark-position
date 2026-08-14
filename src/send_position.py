@@ -48,18 +48,17 @@ if __name__ == "__main__":
 
     WIDTH = 640
     HEIGHT = 480
-    FOV = 62.2      # degrees
-    FOCAL_LENGTH = (WIDTH/2)/math.tan(math.radians(FOV/2))
 
     DRONE_ADDRESS = "serial:///dev/serial0:921600"
 
     marker_type = aruco.DICT_4X4_50
-    camera_matrix = np.array([
-        [FOCAL_LENGTH, 0.0, (WIDTH/2)],
-        [0.0, FOCAL_LENGTH, (HEIGHT/2)], 
-        [0.0, 0.0, 1.0]], 
+    camera_matrix = np.array(
+        [[507.69726421,    0,         323.50083348 ],
+        [  0,         507.66044937, 230.86122221],
+        [  0,           0,           1        ]], 
         dtype=np.float32)
-    visual_odometry = VisualOdometry(marker_type, camera_matrix, show_video=False, show_terminal=False,  marker_info_path="src/marker_info/aruco_floor.json")
+    dist_coeff = np.array([ 0.15549911, -0.08546357, -0.00459428,  0.00295946, -0.75765939], dtype=np.float32)
+    visual_odometry = VisualOdometry(marker_type, camera_matrix, show_video=False, show_terminal=False,  marker_info_path="src/marker_info/aruco_floor.json", dist_coeff=dist_coeff)
     drone_mavlink = DroneMavlink(DRONE_ADDRESS)
 
     asyncio.run(run_send_position(drone_mavlink, visual_odometry, HEIGHT, WIDTH))
