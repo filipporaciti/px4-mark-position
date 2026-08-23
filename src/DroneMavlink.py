@@ -12,7 +12,11 @@ class DroneMavlink:
 
     def __init__(self, drone_address: str):
         self.drone_address = drone_address
-        self.drone = System()
+        
+        if self.drone_address is None:
+            self.drone = System(mavsdk_server_address="127.0.0.1", port=50051)
+        else:
+            self.drone = System()
 
         self.__old_coordinates = [0.0, 0.0, 0.0]
         self.__old_angles = [0.0, 0.0, 0.0]
@@ -126,7 +130,10 @@ class DroneMavlink:
             break
     
     async def connect(self):
-        await self.drone.connect(system_address=self.drone_address)
+        if self.drone_address is None:
+            await self.drone.connect(system_address="grpc://127.0.0.1:50051")
+        else:
+            await self.drone.connect(system_address=self.drone_address)
 
         print("Waiting for drone to connect...")
         async for state in self.drone.core.connection_state():
