@@ -34,7 +34,8 @@ class DroneMavlink:
         await self.connect()
         success = await self.start_offboard()
         if not success:
-            return
+            await self.land()
+            await self.disarm()
 
         await self.health_check()
         await self.arm()
