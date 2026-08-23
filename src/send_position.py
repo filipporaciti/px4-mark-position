@@ -62,7 +62,8 @@ if __name__ == "__main__":
     WIDTH = 640
     HEIGHT = 480
 
-    DRONE_ADDRESS = "serial:///dev/serial0:921600"
+    # DRONE_ADDRESS = "serial:///dev/serial0:921600"
+    DRONE_ADDRESS = None
 
     marker_type = aruco.DICT_4X4_50
     camera_matrix = np.array(
