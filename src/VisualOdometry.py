@@ -14,14 +14,6 @@ class VisualOdometry:
         self.dist_coeff = dist_coeff
         self.marker_info = json.load(open(marker_info_path, "r"))
 
-        l = self.marker_info["marker_length"]
-        self.obj_points = np.array([
-            [-l/2,  l/2, 0],
-            [ l/2,  l/2, 0],
-            [ l/2, -l/2, 0],
-            [-l/2, -l/2, 0]
-        ], dtype=np.float32)
-
         self.aruco_dict = aruco.getPredefinedDictionary(marker_type)
         self.aruco_params = aruco.DetectorParameters()
         self.detector = aruco.ArucoDetector(self.aruco_dict, self.aruco_params)
@@ -119,23 +111,40 @@ class VisualOdometry:
         for i in range(len(ids)):
 
             marker_id = ids[i]
+
+            if str(marker_id) not in self.marker_info["position"]:
+                if self.show_terminal:
+                    print(f"Warning: Marker ID {marker_id} not found in marker_info. Skipping position adjustment.")
+                continue
+
             img_points = corners[i][0]
-            success, rvec, tvec = cv2.solvePnP(self.obj_points, img_points, self.camera_matrix, self.dist_coeff)
+
+            l = self.marker_info["marker_length"]
+
+            if "length" in self.marker_info["position"][str(marker_id)]:
+                l = self.marker_info["position"][str(marker_id)]["length"]
+            obj_points = np.array([
+                [-l/2,  l/2, 0],
+                [ l/2,  l/2, 0],
+                [ l/2, -l/2, 0],
+                [-l/2, -l/2, 0]
+            ], dtype=np.float32)
+
+            success, rvec, tvec = cv2.solvePnP(obj_points, img_points, self.camera_matrix, self.dist_coeff)
 
             if success:
                 cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeff, rvec, tvec, 0.05)
 
                 r, _ = cv2.Rodrigues(rvec)
                 r = r @ self.ENU_TO_NED
-                
-                if str(marker_id) not in self.marker_info["position"]:
-                    if self.show_terminal:
-                        print(f"Warning: Marker ID {marker_id} not found in marker_info. Skipping position adjustment.")
-                    continue
 
-                marker_tvec = np.array([[self.marker_info["position"][str(marker_id)]["x"]], 
-                                        [self.marker_info["position"][str(marker_id)]["y"]], 
-                                        [self.marker_info["position"][str(marker_id)]["z"]]])
+                marker_x = self.marker_info["position"][str(marker_id)]["x"]
+                marker_y = self.marker_info["position"][str(marker_id)]["y"]
+                marker_z = self.marker_info["position"][str(marker_id)]["z"]
+
+                marker_tvec = np.array([[marker_x], 
+                                        [marker_y], 
+                                        [marker_z]])
 
                 camera_world_pos = (-r.T @ tvec) + (self.ENU_TO_NED @ marker_tvec)
 
