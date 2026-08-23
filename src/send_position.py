@@ -8,6 +8,14 @@ from picamera2 import Picamera2
 from VisualOdometry import VisualOdometry
 from DroneMavlink import DroneMavlink
 
+import gc
+import os
+
+# High priority for the process to reduce latency in the main loop. Execute as root
+try:
+    os.nice(-20)
+except PermissionError:
+    pass
 
 async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: VisualOdometry, height: int, width: int):
 
@@ -15,11 +23,16 @@ async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: Visual
     picam2 = Picamera2()
     picam2.configure(picam2.create_video_configuration(
         sensor={"output_size": (3280, 2464)}, 
-        main={"size": (width, height), "format": "YUV420"}
+        main={"size": (width, height), "format": "YUV420"},
+        buffer_count=2
     ))
 
     print("Camera starting...")
     picam2.start()
+    picam2.set_controls({
+        "ExposureTime": 5000, 
+        "FrameDurationLimits": (66666, 66666)
+        })
 
     await drone_mavlink.connect()
     try:
