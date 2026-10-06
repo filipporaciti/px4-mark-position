@@ -32,13 +32,16 @@ class DroneMavlink:
 
     async def start_mission(self, mission: dict):
         await self.connect()
+        await self.health_check()
+        await self.arm()
+
         success = await self.start_offboard()
         if not success:
             await self.land()
             await self.disarm()
 
-        await self.health_check()
-        await self.arm()
+        await self.move_to(0.0, 0.0, -1.4, 0, 1000)
+
 
         for target in mission["targets"]:
             yaw_deg = target.get("yaw_deg", self.DEFAULR_YAW_DEG)
@@ -47,7 +50,6 @@ class DroneMavlink:
             await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg, hover_time_ms, completition_time)
 
         await self.land()
-        await self.disarm()
 
     async def move_to(self, x: float, y: float, z: float, yaw: float, hover_time_ms: int, completition_time: float = None):
         print(f"Moving to: x={x} y={y} z={z} yaw={yaw}")
