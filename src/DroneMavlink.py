@@ -21,13 +21,13 @@ class DroneMavlink:
         self.__old_coordinates = [0.0, 0.0, 0.0]
         self.__old_angles = [0.0, 0.0, 0.0]
 
-        self.OFFBOARD_XY_TOLERANCE = 0.1
-        self.OFFBOARD_Z_TOLERANCE = 0.05
+        self.OFFBOARD_XY_TOLERANCE = 0.05
+        self.OFFBOARD_Z_TOLERANCE = 0.02
         self.OFFBOARD_XY_VEL_TOLERANCE = 0.05
-        self.OFFBOARD_Z_VEL_TOLERANCE = 0.01
-        self.OFFBOARD_YAW_TOLERANCE = 0.1
+        self.OFFBOARD_Z_VEL_TOLERANCE = 0.02
+        self.OFFBOARD_YAW_DEGREE_TOLERANCE = 5
 
-        self.DEFAULT_HOVER_TIME_MS = 1000
+        self.DEFAULT_HOVER_TIME_MS = 0
         self.DEFAULR_YAW_DEG = 0.0
 
     async def start_mission(self, mission: dict):
@@ -61,7 +61,7 @@ class DroneMavlink:
 
             async for angle in self.drone.telemetry.attitude_euler():
                 print(f"Angle: {angle.yaw_deg}")
-                if abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) < self.OFFBOARD_YAW_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) > (360 - self.OFFBOARD_YAW_TOLERANCE):
+                if abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) < self.OFFBOARD_YAW_DEGREE_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) > (360 - self.OFFBOARD_YAW_DEGREE_TOLERANCE):
                     break
         else:
             await asyncio.sleep(completition_time)
@@ -160,7 +160,7 @@ class DroneMavlink:
             AngleBody(angles[0], angles[1], angles[2]),
             Covariance(cov_matrix),
             0
-            ))         
+            ))
 
 
 if __name__ == "__main__":
