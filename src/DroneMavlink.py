@@ -43,25 +43,29 @@ class DroneMavlink:
         for target in mission["targets"]:
             yaw_deg = target.get("yaw_deg", self.DEFAULR_YAW_DEG)
             hover_time_ms = target.get("hover_time_ms", self.DEFAULT_HOVER_TIME_MS)
-            await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg, hover_time_ms)
+            completition_time = target.get("completition_time", None)
+            await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg, hover_time_ms, completition_time)
 
         await self.land()
         await self.disarm()
 
-    async def move_to(self, x: float, y: float, z: float, yaw: float, hover_time_ms: int):
+    async def move_to(self, x: float, y: float, z: float, yaw: float, hover_time_ms: int, completition_time: float = None):
         print(f"Moving to: x={x} y={y} z={z} yaw={yaw}")
         await self.drone.offboard.set_position_ned(PositionNedYaw(x, y, z, yaw))
 
-        async for pos in self.drone.telemetry.position_velocity_ned():
-            print(f"Pos: {pos.position.north_m: .4f}, {pos.position.east_m: .4f}, {pos.position.down_m: .4f} | Vel: {pos.velocity.north_m_s: .4f}, {pos.velocity.east_m_s: .4f}, {pos.velocity.down_m_s: .4f}")
-            if abs(pos.position.north_m - x) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - y) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - z) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
-                break
+        if completition_time is None:
+            async for pos in self.drone.telemetry.position_velocity_ned():
+                print(f"Pos: {pos.position.north_m: .4f}, {pos.position.east_m: .4f}, {pos.position.down_m: .4f} | Vel: {pos.velocity.north_m_s: .4f}, {pos.velocity.east_m_s: .4f}, {pos.velocity.down_m_s: .4f}")
+                if abs(pos.position.north_m - x) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - y) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - z) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
+                    break
 
-        async for angle in self.drone.telemetry.attitude_euler():
-            print(f"Angle: {angle.yaw_deg}")
-            if abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) < self.OFFBOARD_YAW_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) > (360 - self.OFFBOARD_YAW_TOLERANCE):
-                break
-        
+            async for angle in self.drone.telemetry.attitude_euler():
+                print(f"Angle: {angle.yaw_deg}")
+                if abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) < self.OFFBOARD_YAW_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) > (360 - self.OFFBOARD_YAW_TOLERANCE):
+                    break
+        else:
+            await asyncio.sleep(completition_time)
+
         await asyncio.sleep(hover_time_ms / 1000)
 
 
