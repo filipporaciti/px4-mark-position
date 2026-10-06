@@ -19,17 +19,20 @@ async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: Visual
     print("Camera initialize...")
     picam2 = Picamera2()
     picam2.configure(picam2.create_video_configuration(
-        sensor={"output_size": (3280, 2464)}, 
-        main={"size": (width, height), "format": "YUV420"},
-        buffer_count=2
+        main={
+            "size": (width, height), 
+            "format": "YUV420"
+            },
+        buffer_count=2,
+        controls={
+            "ExposureTime": 1500,
+            "FrameDurationLimits": (16666, 16666) # 60 fps
+            }
     ))
 
     print("Camera starting...")
     picam2.start()
-    picam2.set_controls({
-        "ExposureTime": 5000, 
-        "FrameDurationLimits": (66666, 66666)
-        })
+    time.sleep(1)
 
     await drone_mavlink.connect()
     try:
@@ -59,16 +62,17 @@ if __name__ == "__main__":
     WIDTH = 640
     HEIGHT = 480
 
-    # DRONE_ADDRESS = "serial:///dev/serial0:921600"
     DRONE_ADDRESS = None
 
     marker_type = aruco.DICT_4X4_50
     camera_matrix = np.array(
-        [[507.69726421,    0,         323.50083348 ],
-        [  0,         507.66044937, 230.86122221],
-        [  0,           0,           1        ]], 
+        [[663.84860945,   0,         324.23725676],
+         [  0,         663.64022013, 244.3655193 ],
+         [  0,           0,           1        ]],
+ 
         dtype=np.float32)
-    dist_coeff = np.array([ 0.15549911, -0.08546357, -0.00459428,  0.00295946, -0.75765939], dtype=np.float32)
+    dist_coeff = np.array([-3.86314231e-01,  4.79606396e-01, -1.66928451e-03,  3.68820236e-04, -7.73846826e-01], dtype=np.float32)
+    
     visual_odometry = VisualOdometry(marker_type, camera_matrix, show_video=False, show_terminal=False,  marker_info_path="src/marker_info/aruco_floor.json", dist_coeff=dist_coeff)
     drone_mavlink = DroneMavlink(DRONE_ADDRESS)
 
