@@ -7,7 +7,6 @@ import time
 import asyncio
 
 from VisualOdometry import VisualOdometry
-from TelemetryVisualizer import TelemetryVisualizer
 from DroneMavlink import DroneMavlink
 
 
@@ -29,7 +28,6 @@ camera_matrix = np.array([
     [0.0, 0.0, 1.0]], 
     dtype=np.float32)
 visual_odometry = VisualOdometry(marker_type, camera_matrix)
-telemetry_visualizer = TelemetryVisualizer()
 droneMavlink = DroneMavlink(drone_address)
 
 cap = cv2.VideoCapture(video_url, cv2.CAP_FFMPEG)
@@ -47,9 +45,6 @@ async def run_async():
         ids, corners = visual_odometry.process_frame(frame)
         coordinates, angles, cov_matrix = visual_odometry.get_position(frame, corners, ids)
         
-        if coordinates is not None and angles is not None:
-            telemetry_visualizer.update(coordinates[0], coordinates[1], coordinates[2], target_x=TEL_TARGET_X, target_y=TEL_TARGET_Y, target_z=TEL_TARGET_Z)
-
         timestamp_us = int(time.time() * 1e6) # Seconds to microseconds
 
         await droneMavlink.update_position(timestamp_us, coordinates, angles, cov_matrix)
