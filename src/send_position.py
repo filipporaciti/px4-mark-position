@@ -35,25 +35,34 @@ async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: Visual
     time.sleep(1)
 
     await drone_mavlink.connect()
+
+    loop = asyncio.get_running_loop()
+
+    def frame_analyzer(job):
+        request = picam2.wait(job)
+
+        yuv = request.make_array("main")
+        gray = yuv[:height, :width]
+
+        metadata = request.get_metadata()
+        sensor_timestamp_us = metadata["SensorTimestamp"] // 1000
+
+        request.release()
+        # =======
+
+        ids, corners = visual_odometry.process_frame(gray, grayConvert=False)
+        coordinates, angles, cov_matrix = visual_odometry.get_position(gray, corners, ids)
+        
+        asyncio.run_coroutine_threadsafe(
+            drone_mavlink.update_position(sensor_timestamp_us, coordinates, angles, cov_matrix),
+            loop
+        )
+
+
     try:
         while True:
-
-            # ===== Get frame and metadata =====
-            request = picam2.capture_request()
-
-            yuv = request.make_array("main")
-            gray = yuv[:height, :width]
-
-            metadata = request.get_metadata()
-            sensor_timestamp_us = metadata["SensorTimestamp"] // 1000
-
-            request.release()
-            # ==================================
-
-            ids, corners = visual_odometry.process_frame(gray, grayConvert=False)
-            coordinates, angles, cov_matrix = visual_odometry.get_position(gray, corners, ids)
-
-            await drone_mavlink.update_position(sensor_timestamp_us, coordinates, angles, cov_matrix)
+            picam2.capture_request(signal_function=frame_analyzer)
+            await asyncio.sleep(0.01) # Allow other tasks to run
     finally:
         picam2.stop()
 
