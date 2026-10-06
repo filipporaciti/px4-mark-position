@@ -84,6 +84,15 @@ class VisualOdometry:
         l = (side1 + side2 + side3 + side4) / 4
         return l
     
+    def get_2d_polygon_area(self, img_points):
+        c = img_points.reshape((4, 2))
+        (top_left, top_right, bottom_right, bottom_left) = c
+        area = 0.5 * abs((top_left[0] * top_right[1] - top_right[0] * top_left[1]) +
+                         (top_right[0] * bottom_right[1] - bottom_right[0] * top_right[1]) +
+                         (bottom_right[0] * bottom_left[1] - bottom_left[0] * bottom_right[1]) +
+                         (bottom_left[0] * top_left[1] - top_left[0] * bottom_left[1]))
+        return area
+    
     def roll_x(self, rad):
         c = math.cos(rad)
         s = math.sin(rad)
@@ -108,6 +117,13 @@ class VisualOdometry:
     def get_position(self, frame, corners, ids):
         if ids is None or corners is None or frame is None:
             return None, None, [float('nan')] * 21
+
+        val = np.array([-self.get_2d_polygon_area(corner[0]) for corner in corners])
+        sorted_index = np.argsort(val)
+
+        ids = ids[sorted_index]
+        corners = [corners[i] for i in sorted_index]
+
 
         for i in range(len(ids)):
 
