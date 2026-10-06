@@ -1,17 +1,14 @@
-import numpy as np
-from cv2 import aruco
-import time
-import math
-import asyncio
 from picamera2 import Picamera2
+from cv2 import aruco
+import numpy as np
+import asyncio
+import time
+import os
 
 from VisualOdometry import VisualOdometry
 from DroneMavlink import DroneMavlink
 
-import gc
-import os
-
-# High priority for the process to reduce latency in the main loop. Execute as root
+# Set the process priority to high (requires root privileges)
 try:
     os.nice(-20)
 except PermissionError:
