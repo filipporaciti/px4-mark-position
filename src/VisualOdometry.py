@@ -16,6 +16,7 @@ class VisualOdometry:
 
         self.aruco_dict = aruco.getPredefinedDictionary(marker_type)
         self.aruco_params = aruco.DetectorParameters()
+        self.aruco_params.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_SUBPIX
         self.detector = aruco.ArucoDetector(self.aruco_dict, self.aruco_params)
 
         self.ENU_TO_NED = self.roll_y(math.pi) @ self.roll_z(math.pi/2)
