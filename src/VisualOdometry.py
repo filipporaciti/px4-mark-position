@@ -150,7 +150,9 @@ class VisualOdometry:
             success, rvec, tvec = cv2.solvePnP(obj_points, img_points, self.camera_matrix, self.dist_coeff)
 
             if success:
-                cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeff, rvec, tvec, 0.05)
+                
+                if self.show_video:
+                    cv2.drawFrameAxes(frame, self.camera_matrix, self.dist_coeff, rvec, tvec, 0.05)
 
                 r, _ = cv2.Rodrigues(rvec)
                 r = r @ self.ENU_TO_NED
