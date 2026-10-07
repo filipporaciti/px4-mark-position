@@ -1,5 +1,5 @@
+from typing import NamedTuple
 import asyncio
-import math
 import time
 import cv2
 
@@ -9,6 +9,14 @@ from mavsdk.offboard import OffboardError, PositionNedYaw
 from mavsdk.telemetry import LandedState
 
 class DroneMavlink:
+
+    class Target(NamedTuple):
+        north_m: float
+        east_m: float
+        down_m: float
+        yaw_deg: float = 0.0
+        hover_time_ms: int = 0
+        expiration_time_s: float = None
 
     def __init__(self, drone_address: str):
         self.drone_address = drone_address
@@ -27,9 +35,6 @@ class DroneMavlink:
         self.OFFBOARD_Z_VEL_TOLERANCE = 0.02
         self.OFFBOARD_YAW_DEGREE_TOLERANCE = 5
 
-        self.DEFAULT_HOVER_TIME_MS = 0
-        self.DEFAULR_YAW_DEG = 0.0
-
     async def start_mission(self, mission: dict):
         await self.connect()
         await self.health_check()
@@ -40,35 +45,33 @@ class DroneMavlink:
             await self.land()
             await self.disarm()
 
-        await self.move_to(0.0, 0.0, -1.4, 0, 1000)
+        await self.move_to(self.Target(north_m=0.0, east_m=0.0, down_m=-1.4, hover_time_ms=1000))
 
 
-        for target in mission["targets"]:
-            yaw_deg = target.get("yaw_deg", self.DEFAULR_YAW_DEG)
-            hover_time_ms = target.get("hover_time_ms", self.DEFAULT_HOVER_TIME_MS)
-            completition_time = target.get("completition_time", None)
-            await self.move_to(target["north_m"], target["east_m"], target["down_m"], yaw_deg, hover_time_ms, completition_time)
+        for t in mission["targets"]:
+            target = self.Target(**t)
+            await self.move_to(target)
 
         await self.land()
 
-    async def move_to(self, x: float, y: float, z: float, yaw: float, hover_time_ms: int, completition_time: float = None):
-        print(f"Moving to: x={x} y={y} z={z} yaw={yaw}")
-        await self.drone.offboard.set_position_ned(PositionNedYaw(x, y, z, yaw))
+    async def move_to(self, target: Target):
+        print(f"Moving to: x={target.north_m} y={target.east_m} z={target.down_m} yaw={target.yaw_deg}")
+        await self.drone.offboard.set_position_ned(PositionNedYaw(target.north_m, target.east_m, target.down_m, target.yaw_deg))
 
-        if completition_time is None:
+        if target.expiration_time_s is None:
             async for pos in self.drone.telemetry.position_velocity_ned():
                 print(f"Pos: {pos.position.north_m: .4f}, {pos.position.east_m: .4f}, {pos.position.down_m: .4f} | Vel: {pos.velocity.north_m_s: .4f}, {pos.velocity.east_m_s: .4f}, {pos.velocity.down_m_s: .4f}")
-                if abs(pos.position.north_m - x) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - y) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - z) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
+                if abs(pos.position.north_m - target.north_m) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - target.east_m) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - target.down_m) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
                     break
 
             async for angle in self.drone.telemetry.attitude_euler():
                 print(f"Angle: {angle.yaw_deg}")
-                if abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) < self.OFFBOARD_YAW_DEGREE_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((yaw + 360) % 360)) > (360 - self.OFFBOARD_YAW_DEGREE_TOLERANCE):
+                if abs(((angle.yaw_deg + 360) % 360) - ((target.yaw_deg + 360) % 360)) < self.OFFBOARD_YAW_DEGREE_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((target.yaw_deg + 360) % 360)) > (360 - self.OFFBOARD_YAW_DEGREE_TOLERANCE):
                     break
         else:
-            await asyncio.sleep(completition_time)
+            await asyncio.sleep(target.expiration_time_s)
 
-        await asyncio.sleep(hover_time_ms / 1000)
+        await asyncio.sleep(target.hover_time_ms / 1000)
 
 
     async def arm(self):
