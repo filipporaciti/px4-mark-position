@@ -29,14 +29,15 @@ class DroneMavlink:
 
         self.__old_coordinates = [0.0, 0.0, 0.0]
         self.__old_angles = [0.0, 0.0, 0.0]
-
-        self.__old_target = Target(0.0, 0.0, -1.4, 0.0, 1000)
+        self.__old_target = Target(0.0, 0.0, 0.0)
 
         self.OFFBOARD_XY_TOLERANCE = 0.05
         self.OFFBOARD_Z_TOLERANCE = 0.02
         self.OFFBOARD_XY_VEL_TOLERANCE = 0.05
         self.OFFBOARD_Z_VEL_TOLERANCE = 0.02
         self.OFFBOARD_YAW_DEGREE_TOLERANCE = 5
+
+        self.TAKEOFF_TARGET = Target(0.0, 0.0, -1.4, 0.0, 1000)
 
     async def start_mission(self, mission: dict):
         await self.connect()
@@ -48,7 +49,7 @@ class DroneMavlink:
             await self.land()
             await self.disarm()
 
-        await self.move_to(self.__old_target, self.__old_target)
+        await self.move_to(self.TAKEOFF_TARGET, self.__old_target)
 
         for t in mission["targets"]:
             target = Target(**t)
