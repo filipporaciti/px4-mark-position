@@ -5,18 +5,18 @@ import cv2
 
 from mavsdk import System
 from mavsdk.mocap import VisionPositionEstimate, Covariance, AngleBody, PositionBody
-from mavsdk.offboard import OffboardError, PositionNedYaw
+from mavsdk.offboard import OffboardError, PositionNedYaw, VelocityNedYaw
 from mavsdk.telemetry import LandedState
 
-class DroneMavlink:
+class Target(NamedTuple):
+    north_m: float
+    east_m: float
+    down_m: float
+    yaw_deg: float = 0.0
+    hover_time_ms: int = 0
+    expiration_time_s: float = None
 
-    class Target(NamedTuple):
-        north_m: float
-        east_m: float
-        down_m: float
-        yaw_deg: float = 0.0
-        hover_time_ms: int = 0
-        expiration_time_s: float = None
+class DroneMavlink:
 
     def __init__(self, drone_address: str):
         self.drone_address = drone_address
@@ -28,6 +28,8 @@ class DroneMavlink:
 
         self.__old_coordinates = [0.0, 0.0, 0.0]
         self.__old_angles = [0.0, 0.0, 0.0]
+
+        self.__old_target = Target(0.0, 0.0, -1.4, 0.0, 1000)
 
         self.OFFBOARD_XY_TOLERANCE = 0.05
         self.OFFBOARD_Z_TOLERANCE = 0.02
@@ -45,16 +47,17 @@ class DroneMavlink:
             await self.land()
             await self.disarm()
 
-        await self.move_to(self.Target(north_m=0.0, east_m=0.0, down_m=-1.4, hover_time_ms=1000))
-
+        await self.move_to(self.__old_target, self.__old_target)
 
         for t in mission["targets"]:
-            target = self.Target(**t)
-            await self.move_to(target)
+            target = Target(**t)
+            await self.move_to(target, self.__old_target)
+
+            self.__old_target = target
 
         await self.land()
 
-    async def move_to(self, target: Target):
+    async def move_to(self, target: Target, old_target: Target):
         print(f"Moving to: x={target.north_m} y={target.east_m} z={target.down_m} yaw={target.yaw_deg}")
         await self.drone.offboard.set_position_ned(PositionNedYaw(target.north_m, target.east_m, target.down_m, target.yaw_deg))
 
@@ -69,6 +72,13 @@ class DroneMavlink:
                 if abs(((angle.yaw_deg + 360) % 360) - ((target.yaw_deg + 360) % 360)) < self.OFFBOARD_YAW_DEGREE_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((target.yaw_deg + 360) % 360)) > (360 - self.OFFBOARD_YAW_DEGREE_TOLERANCE):
                     break
         else:
+            north_m_s = (target.north_m - old_target.north_m) / target.expiration_time_s
+            east_m_s = (target.east_m - old_target.east_m) / target.expiration_time_s
+            down_m_s = (target.down_m - old_target.down_m) / target.expiration_time_s
+            yaw_deg_s = (target.yaw_deg - old_target.yaw_deg) / target.expiration_time_s
+            print(f"Speed: north_m_s={north_m_s} east_m_s={east_m_s} down_m_s={down_m_s} yaw_deg_s={yaw_deg_s}")
+
+            await self.drone.offboard.set_velocity_ned(VelocityNedYaw(north_m_s, east_m_s, down_m_s, yaw_deg_s))
             await asyncio.sleep(target.expiration_time_s)
 
         await asyncio.sleep(target.hover_time_ms / 1000)
