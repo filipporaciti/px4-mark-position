@@ -15,6 +15,7 @@ class Target(NamedTuple):
     yaw_deg: float = 0.0
     hover_time_ms: int = 0
     expiration_time_s: float = None
+    vel_m_s: float = None
 
 class DroneMavlink:
 
@@ -61,7 +62,28 @@ class DroneMavlink:
         print(f"Moving to: x={target.north_m} y={target.east_m} z={target.down_m} yaw={target.yaw_deg}")
         await self.drone.offboard.set_position_ned(PositionNedYaw(target.north_m, target.east_m, target.down_m, target.yaw_deg))
 
-        if target.expiration_time_s is None:
+        if target.expiration_time_s is not None or target.vel_m_s is not None:
+            expiration_time_s = target.expiration_time_s
+            distance_m = ((target.north_m - old_target.north_m) ** 2 + (target.east_m - old_target.east_m) ** 2 + (target.down_m - old_target.down_m) ** 2) ** 0.5
+            if distance_m == 0:
+                return
+
+            if target.expiration_time_s is not None:
+                north_m_s = (target.north_m - old_target.north_m) / target.expiration_time_s
+                east_m_s = (target.east_m - old_target.east_m) / target.expiration_time_s
+                down_m_s = (target.down_m - old_target.down_m) / target.expiration_time_s
+            else:
+                north_m_s = (target.north_m - old_target.north_m) / distance_m * target.vel_m_s
+                east_m_s = (target.east_m - old_target.east_m) / distance_m * target.vel_m_s
+                down_m_s = (target.down_m - old_target.down_m) / distance_m * target.vel_m_s
+                expiration_time_s = distance_m / target.vel_m_s
+            yaw_deg_s = (target.yaw_deg - old_target.yaw_deg) / expiration_time_s
+
+            print(f"Distance: {distance_m} m, Expiration Time: {expiration_time_s} s, Speed: north_m_s={north_m_s} east_m_s={east_m_s} down_m_s={down_m_s} yaw_deg_s={yaw_deg_s}")
+
+            await self.drone.offboard.set_velocity_ned(VelocityNedYaw(north_m_s, east_m_s, down_m_s, yaw_deg_s))
+            await asyncio.sleep(expiration_time_s)
+        else:
             async for pos in self.drone.telemetry.position_velocity_ned():
                 print(f"Pos: {pos.position.north_m: .4f}, {pos.position.east_m: .4f}, {pos.position.down_m: .4f} | Vel: {pos.velocity.north_m_s: .4f}, {pos.velocity.east_m_s: .4f}, {pos.velocity.down_m_s: .4f}")
                 if abs(pos.position.north_m - target.north_m) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - target.east_m) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - target.down_m) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
@@ -71,15 +93,6 @@ class DroneMavlink:
                 print(f"Angle: {angle.yaw_deg}")
                 if abs(((angle.yaw_deg + 360) % 360) - ((target.yaw_deg + 360) % 360)) < self.OFFBOARD_YAW_DEGREE_TOLERANCE or abs(((angle.yaw_deg + 360) % 360) - ((target.yaw_deg + 360) % 360)) > (360 - self.OFFBOARD_YAW_DEGREE_TOLERANCE):
                     break
-        else:
-            north_m_s = (target.north_m - old_target.north_m) / target.expiration_time_s
-            east_m_s = (target.east_m - old_target.east_m) / target.expiration_time_s
-            down_m_s = (target.down_m - old_target.down_m) / target.expiration_time_s
-            yaw_deg_s = (target.yaw_deg - old_target.yaw_deg) / target.expiration_time_s
-            print(f"Speed: north_m_s={north_m_s} east_m_s={east_m_s} down_m_s={down_m_s} yaw_deg_s={yaw_deg_s}")
-
-            await self.drone.offboard.set_velocity_ned(VelocityNedYaw(north_m_s, east_m_s, down_m_s, yaw_deg_s))
-            await asyncio.sleep(target.expiration_time_s)
 
         await asyncio.sleep(target.hover_time_ms / 1000)
 
