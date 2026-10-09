@@ -23,7 +23,7 @@ async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: Visual
             "size": (width, height), 
             "format": "YUV420"
             },
-        buffer_count=2,
+        buffer_count=1,
         controls={
             "ExposureTime": 1500,
             "FrameDurationLimits": (16666, 16666) # 60 fps
@@ -62,7 +62,7 @@ async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: Visual
     try:
         while True:
             picam2.capture_request(signal_function=frame_analyzer)
-            await asyncio.sleep(0.01) # Allow other tasks to run
+            await asyncio.sleep(0.001) # Allow other tasks to run
     finally:
         picam2.stop()
 
