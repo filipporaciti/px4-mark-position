@@ -39,6 +39,7 @@ async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: Visual
     loop = asyncio.get_running_loop()
 
     def frame_analyzer(job):
+        # =======
         request = picam2.wait(job)
 
         yuv = request.make_array("main")
@@ -82,7 +83,7 @@ if __name__ == "__main__":
         dtype=np.float32)
     dist_coeff = np.array([-3.86314231e-01,  4.79606396e-01, -1.66928451e-03,  3.68820236e-04, -7.73846826e-01], dtype=np.float32)
     
-    visual_odometry = VisualOdometry(marker_type, camera_matrix, show_video=False, show_terminal=False,  marker_info_path="src/marker_info/aruco_floor.json", dist_coeff=dist_coeff)
+    visual_odometry = VisualOdometry(marker_type, camera_matrix, show_video=False, show_terminal=True,  marker_info_path="src/marker_info/aruco_floor.json", dist_coeff=dist_coeff)
     drone_mavlink = DroneMavlink(DRONE_ADDRESS)
 
     asyncio.run(run_send_position(drone_mavlink, visual_odometry, HEIGHT, WIDTH))
