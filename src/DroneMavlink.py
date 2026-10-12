@@ -50,6 +50,7 @@ class DroneMavlink:
             await self.disarm()
 
         await self.move_to(self.TAKEOFF_TARGET, self.__old_target)
+        self.__old_target = self.TAKEOFF_TARGET
 
         for t in mission["targets"]:
             target = Target(**t)
@@ -61,7 +62,6 @@ class DroneMavlink:
 
     async def move_to(self, target: Target, old_target: Target):
         print(f"Moving to: x={target.north_m} y={target.east_m} z={target.down_m} yaw={target.yaw_deg}")
-        await self.drone.offboard.set_position_ned(PositionNedYaw(target.north_m, target.east_m, target.down_m, target.yaw_deg))
 
         if target.expiration_time_s is not None or target.vel_m_s is not None:
             expiration_time_s = target.expiration_time_s
@@ -84,7 +84,9 @@ class DroneMavlink:
 
             await self.drone.offboard.set_velocity_ned(VelocityNedYaw(north_m_s, east_m_s, down_m_s, yaw_deg_s))
             await asyncio.sleep(expiration_time_s)
+            await self.drone.offboard.set_position_ned(PositionNedYaw(target.north_m, target.east_m, target.down_m, target.yaw_deg))
         else:
+            await self.drone.offboard.set_position_ned(PositionNedYaw(target.north_m, target.east_m, target.down_m, target.yaw_deg))
             async for pos in self.drone.telemetry.position_velocity_ned():
                 print(f"Pos: {pos.position.north_m: .4f}, {pos.position.east_m: .4f}, {pos.position.down_m: .4f} | Vel: {pos.velocity.north_m_s: .4f}, {pos.velocity.east_m_s: .4f}, {pos.velocity.down_m_s: .4f}")
                 if abs(pos.position.north_m - target.north_m) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.east_m - target.east_m) < self.OFFBOARD_XY_TOLERANCE and abs(pos.position.down_m - target.down_m) < self.OFFBOARD_Z_TOLERANCE and abs(pos.velocity.north_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.east_m_s) < self.OFFBOARD_XY_VEL_TOLERANCE and abs(pos.velocity.down_m_s) < self.OFFBOARD_Z_VEL_TOLERANCE:
