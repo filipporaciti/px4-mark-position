@@ -2,6 +2,10 @@
 
 Implementation of PX4 drone in GPS denied environment that uses aruco markers to visual estimate local position.
 
+## Requirements
+* OpenCV with GStreamer
+
+
 ## Build
 MacOS
 ```bash

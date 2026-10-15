@@ -20,7 +20,6 @@ TEL_TARGET_Y = 0.0
 TEL_TARGET_Z = -2.0
 
 drone_address = "udpin://0.0.0.0:14540"
-video_url = "udp://127.0.0.1:5001?fifo_size=0&overrun_nonfatal=1"
 marker_type = aruco.DICT_4X4_50
 camera_matrix = np.array([
     [FOCAL_LENGTH, 0.0, (WIDTH/2)],
@@ -30,11 +29,21 @@ camera_matrix = np.array([
 visual_odometry = VisualOdometry(marker_type, camera_matrix)
 droneMavlink = DroneMavlink(drone_address)
 
-cap = cv2.VideoCapture(video_url, cv2.CAP_FFMPEG)
-cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+pipeline = (
+    'udpsrc port=5600 '
+    'caps="application/x-rtp,media=video,'
+    'clock-rate=90000,encoding-name=H264" '
+    '! rtph264depay '
+    '! avdec_h264 '
+    '! videoconvert '
+    '! video/x-raw,format=BGR '
+    '! appsink drop=true sync=false'
+)
+cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+
 
 if not cap.isOpened():
-    raise Exception(f"Error: Unable to connect to stream at {video_url}")
+    raise Exception(f"Error: Unable to connect to the video stream")
 
 
 async def run_async():
