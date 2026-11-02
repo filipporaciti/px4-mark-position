@@ -1,10 +1,9 @@
-import math
-
-import numpy as np
 from cv2 import aruco
 import cv2
-import time
+import numpy as np
 import asyncio
+import time
+import math
 
 from VisualOdometry import VisualOdometry
 from DroneMavlink import DroneMavlink
@@ -14,10 +13,6 @@ WIDTH = 1280
 HEIGHT = 960
 FOV = 100       # degrees
 FOCAL_LENGTH = (WIDTH/2)/math.tan(math.radians(FOV/2))
-
-TEL_TARGET_X = 0.0
-TEL_TARGET_Y = 0.0
-TEL_TARGET_Z = -2.0
 
 drone_address = "udpin://0.0.0.0:14540"
 marker_type = aruco.DICT_4X4_50

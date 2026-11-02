@@ -1,6 +1,5 @@
 import numpy as np
 from cv2 import aruco
-import math
 import asyncio
 import json
 import sys
@@ -11,7 +10,6 @@ from DroneMavlink import DroneMavlink
 from send_position import run_send_position
 from mission import run_mission
 
-import gc
 import os
 
 # Set the process priority to high (requires root privileges)
