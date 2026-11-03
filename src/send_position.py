@@ -5,8 +5,8 @@ import asyncio
 import time
 import os
 
-from VisualOdometry import VisualOdometry
-from DroneMavlink import DroneMavlink
+from visual_odometry import VisualOdometry
+from drone_mavlink import DroneMavlink
 
 # Set the process priority to high (requires root privileges)
 try:

@@ -4,8 +4,8 @@ import asyncio
 import json
 import sys
 
-from VisualOdometry import VisualOdometry
-from DroneMavlink import DroneMavlink
+from visual_odometry import VisualOdometry
+from drone_mavlink import DroneMavlink
 
 from send_position import run_send_position
 from mission import run_mission

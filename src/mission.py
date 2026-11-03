@@ -2,7 +2,7 @@ import asyncio
 import json
 import sys
 
-from DroneMavlink import DroneMavlink
+from drone_mavlink import DroneMavlink
 
 
 async def run_mission(drone_mavlink: DroneMavlink, mission: dict):
