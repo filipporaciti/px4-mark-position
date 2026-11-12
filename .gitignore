@@ -1,3 +1,14 @@
 .DS_Store
 .vscode
 __pycache__
+
+# texstudio
+*.aux
+*.xmpi
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.xmpdata

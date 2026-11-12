@@ -1,0 +1,230 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                             %
+%           TEMPLATE LATEX PER TESI                                           %
+%           ______________                                                    %
+%                                                                             %
+%           Ultima revisione: 10 Dicembre 2025                                %
+%           Revisori: G.Presti; L.A.Ludovico; F. Avanzini; M. Tiraboschi      %
+%                                                                             %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Usare l'opzione twoside se volete stampare fronte-retro. Es.:
+% \documentclass[twoside,12pt]{report}
+% Si consiglia di diminuire il font per tesi di dottorato in formato 17x24. Es:
+% \documentclass[11pt]{report}
+\documentclass[12pt]{report}
+
+% --- PREAMBOLO ---------------------------------------------------------------
+% Inserire qui eventuali package da includere o 
+% definizioni di comandi personalizzati...
+
+% ...ad esempio il seguente package permette di inserire note visibili nel pdf di output,
+% (il comando che lo precede serve a lasciare spazio alle note, va rimosso prima della consegna)
+% \setlength {\marginparwidth }{2cm}
+% \usepackage{todonotes}  % istruzioni sull'uso in sezione 3.2.9
+
+% Selezione lingua
+\usepackage[italian]{babel}
+
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstdefinelanguage{json}{
+	basicstyle=\ttfamily\small,
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	stepnumber=1,
+	numbersep=8pt,
+	showstringspaces=false,
+	breaklines=true,
+	frame=single,
+	string=[s]{"}{"},
+	stringstyle=\color{blue},
+	comment=[l]{:},
+	commentstyle=\color{black},
+}
+\lstdefinestyle{pythonstyle}{
+	language=Python,
+	basicstyle=\ttfamily\small,
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{green!50!black},
+	stringstyle=\color{red!70!black},
+	showstringspaces=false,
+	breaklines=true,
+	frame=single,
+	tabsize=4,
+	keepspaces=true
+}
+
+\lstset{
+	tabsize=2,
+	keepspaces=true
+}
+
+\usepackage{tesi}
+% Puoi usare il font di default di LaTeX con la relativa opzione del package
+% \usepackage[defaultfont]{tesi}
+% Esiste anche un'opzione per il formato 17x24 per le tesi di dottorato
+% \usepackage[phd]{tesi}
+
+% In caso il copia-incolla del PDF generato perda gli spazi,
+% provare a decommentare la seguente riga
+% \pdfinterwordspaceon
+
+% !!! INFORMAZIONI SULLA TESI DA COMPILARE !!!
+
+%   UNIVERSITA' E CORSO DI LAUREA:
+\university{Università degli Studi di Milano}
+\unilogo{immagini/loghi/unimi}
+\faculty{Facoltà di Scienze e Tecnologie}
+\department{Dipartimento di Informatica\\Giovanni Degli Antoni}
+\cdl{Corso di Laurea Triennale in\\Informatica}
+
+%   TITOLO TESI:
+\title{Studio e realizzazione di un drone a volo autonomo in assenza di geolocalizzazione}
+
+%   AUTORE:
+\author{Filippo Raciti}
+\matricola{29692A}
+% "Elaborato Finale" per i CdL triennali
+% "Tesi di Laurea" per i CdL magistrali
+\typeofthesis{Elaborato Finale}
+
+%   RELATORE E CORRELATORE:
+\relatore{Prof. Federico Pedersini}
+\correlatore{Prof. Giorgio Biacchi}
+
+%   LABORATORIO:
+% Questa sezione crea una pagina di chiusura della tesi con
+% il logo dell'ente/laboratorio presso cui si è svolto il tirocinio.
+% Più afferenze/url/loghi sono supportate,
+% e la frase può essere personalizzata.
+% Qui trovate alcuni predefiniti del nostro dipartimento
+% \adaptlab
+% \aislab
+% \anacletolab
+% \bisplab
+% \connetslab
+% \everywarelab
+% \falselab
+% \iebilab
+% \islab
+% \lailalab
+% \lalalab
+% \lawlab
+% \laserlab
+% \limlab
+% \mipslab
+% \optlab
+% \phuselab
+% \ponglab
+% \sesarlab
+% \spdplab
+
+% Esempio di personalizzazione della pagina di chiusura
+% (non consegnate con questo esempio!)
+% (da commentare in caso sia sufficiente una delle macro precedenti)
+% \lab{Laboratorio di Ricerca}
+% \lab[in collaborazione con l']{Azienda Specifica}
+% \laburl{https://di.unimi.it/it/ricerca/risorse-e-luoghi-della-ricerca/laboratori-di-ricerca}
+% \lablogo{immagini/redqmark}
+
+% Con questo comando si può cambiare la dimensione (massima
+% altezza e larghezza consentite) dei loghi
+% \setlength\lablogosize{25mm}
+
+%   ANNO ACCADEMICO
+% \the\year inserisce l'anno corrente
+% per specificare manualmente un anno accademico
+% NON inserire nel formato 1970-1971, ma
+% inserire solo 1970
+\academicyear{2025} 
+
+%   INDICI:
+% elenco delle figure (facoltativo)
+% \figurespagetrue
+% elenco delle tabelle (facoltativo)
+% \tablespagetrue
+% prefazioni nell'indice (facoltativo)
+\prefaceintoctrue
+% indice nell'indice (facoltativo)
+\tocintoctrue
+% --- FINE PREAMBOLO ----------------------------------------------------------
+
+\begin{document}
+
+% Creazione automatica della copertina
+% Centra la copertina nel foglio: usa questo comando per la copertina esterna
+% \makecenteredfrontpage
+% Copertina allineata alle altre pagine: usa questo comando per la copertina interna
+\makefrontpage
+
+% 
+%			PAGINA DI DEDICA E/O CITAZIONE
+%			facoltativa, questa è l'unica cosa che dovete formattare a mano, un po' come vi pare
+%
+
+% {...}
+
+% \clearpage
+% \beforepreface
+
+% 
+%			PREFAZIONE (facoltativa)
+%
+
+% \prefacesection{Prefazione}
+% Le prefazioni non sono molto comuni, tuttavia a volte capita che qualcuno voglia dire qualcosa che esuli dal lavoro in sé (come un meta-commento sull'elaborato), o voglia fornire informazioni riguardanti l'eventuale progetto entro cui la tesi si colloca (in questo caso è probabile che sia il relatore a scrivere questa parte).
+
+%
+%			SOMMARIO
+%
+
+\prefacesection{Sommario}
+%La localizzazione è un aspetto in robotica di fondamentale importanza per lo sviluppo di veicoli autonomi. Una possibile soluzione è quella di utilizzare un sistema di geolocalizzazione come il GNSS, ma questi sistemi hanno una precisione di 1-3 metri; si potrebbero utilizzare la geolocalizzazione combinata all’utilizzo della visual odometry nelle zone in cui si vuole una maggiore precisione, ma questa soluzione non si può applicare nel caso in cui i sistemi di geolocalizzazione non sono utilizzabili.\\
+%Questa tesi si pone come obiettivo quello di creare un sistema che è in grado di eseguire missioni autonome sfruttando dei marker fissi come sistema di localizzazione; il tutto deve essere realizzato e testato su un UAV multirotore. \\
+%L’architettura standard dell’UAV prevede l’utilizzo di un flight controller per la gestione del movimento e della posa; inoltre è presente anche un ricevitore GPS per la geolocalizzazione. Tale architettura viene modificata eliminando il GPS dall’UAV e inserendo un companion computer dotato di una camera, attraverso il quale sono stati implementato due sistemi: il primo che permette di catturare, analizzare le immagini dalla camera e inviare posizione e posa dell’UAV al flight controller; il secondo sistema permette di eseguire una missione custom attraverso l’utilizzo della modalità offboard dell’UAV. \\
+%Inizialmente tutti i test sono stati fatti sul simulatore Gazebo con PX4 Autopilot, QGroundControl e un programma scritto in Python per la visual odometry e la mission. Successivamente si è passati ai test con un drone reale utilizzando QGroundControl, le stesse classi Python del simulatore, Raspberry Pi 3, Holybro Pixhawk 6C Mini e la camera OV7251. 
+
+%
+%			Creazione automatica dell'indice
+%
+
+\afterpreface
+
+%   CAPITOLO 1: Introduzione
+\include{capitoli/capitolo1}
+
+%   CAPITOLO 2: 
+\include{capitoli/capitolo2}
+
+%   CAPITOLO 3: 
+\include{capitoli/capitolo3}
+
+%   CAPITOLO 4: 
+\include{capitoli/capitolo4}
+
+%   CAPITOLO 5: 
+\include{capitoli/capitolo5}
+
+
+%
+%			BIBLIOGRAFIA
+%
+
+% Si può specificare a che livello della TOC deve essere la bibliografia.
+% Il default è 'chapter', per 'part' usare
+% \beforebibliography[part]
+\beforebibliography
+\bibliographystyle{unsrt}
+\bibliography{bibliografia}
+
+% Pagina di chiusura
+% \closingpage
+
+\end{document}
