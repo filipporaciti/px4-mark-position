@@ -49,40 +49,38 @@ class DroneMavlink:
             await self.land()
             await self.disarm()
 
-        await self.move_to(self.TAKEOFF_TARGET, self.__old_target)
+        await self.move_to(self.TAKEOFF_TARGET)
         self.__old_target = self.TAKEOFF_TARGET
 
         for t in mission["targets"]:
             target = Target(**t)
-            await self.move_to(target, self.__old_target)
-
-            self.__old_target = target
+            await self.move_to(target)
 
         await self.land()
 
-    async def move_to(self, target: Target, old_target: Target):
+    async def move_to(self, target: Target):
         print(f"Moving to: x={target.north_m} y={target.east_m} z={target.down_m} yaw={target.yaw_deg}")
 
         if target.expiration_time_s is not None or target.vel_m_s is not None:
             expiration_time_s = target.expiration_time_s
-            distance_m = ((target.north_m - old_target.north_m) ** 2 + (target.east_m - old_target.east_m) ** 2 + (target.down_m - old_target.down_m) ** 2) ** 0.5
+            distance_m = ((target.north_m - self.__old_target.north_m) ** 2 + (target.east_m - self.__old_target.east_m) ** 2 + (target.down_m - self.__old_target.down_m) ** 2) ** 0.5
             if distance_m == 0:
                 return
 
-            if target.expiration_time_s is not None:
-                north_m_s = (target.north_m - old_target.north_m) / target.expiration_time_s
-                east_m_s = (target.east_m - old_target.east_m) / target.expiration_time_s
-                down_m_s = (target.down_m - old_target.down_m) / target.expiration_time_s
+            if expiration_time_s is not None:
+                north_m_s = (target.north_m - self.__old_target.north_m) / expiration_time_s
+                east_m_s = (target.east_m - self.__old_target.east_m) / expiration_time_s
+                down_m_s = (target.down_m - self.__old_target.down_m) / expiration_time_s
             else:
-                north_m_s = (target.north_m - old_target.north_m) / distance_m * target.vel_m_s
-                east_m_s = (target.east_m - old_target.east_m) / distance_m * target.vel_m_s
-                down_m_s = (target.down_m - old_target.down_m) / distance_m * target.vel_m_s
+                north_m_s = (target.north_m - self.__old_target.north_m) / distance_m * target.vel_m_s
+                east_m_s = (target.east_m - self.__old_target.east_m) / distance_m * target.vel_m_s
+                down_m_s = (target.down_m - self.__old_target.down_m) / distance_m * target.vel_m_s
                 expiration_time_s = distance_m / target.vel_m_s
-            yaw_deg_s = (target.yaw_deg - old_target.yaw_deg) / expiration_time_s
+            yaw_deg_d_s = (target.yaw_deg - self.__old_target.yaw_deg) / expiration_time_s
 
-            print(f"Distance: {distance_m} m, Expiration Time: {expiration_time_s} s, Speed: north_m_s={north_m_s} east_m_s={east_m_s} down_m_s={down_m_s} yaw_deg_s={yaw_deg_s}")
+            print(f"Distance: {distance_m} m, Expiration Time: {expiration_time_s} s, Speed: north_m_s={north_m_s} east_m_s={east_m_s} down_m_s={down_m_s} yaw_deg_d_s={yaw_deg_d_s}")
 
-            await self.drone.offboard.set_velocity_ned(VelocityNedYaw(north_m_s, east_m_s, down_m_s, yaw_deg_s))
+            await self.drone.offboard.set_velocity_ned(VelocityNedYaw(north_m_s, east_m_s, down_m_s, yaw_deg_d_s))
             await asyncio.sleep(expiration_time_s)
             await self.drone.offboard.set_position_ned(PositionNedYaw(target.north_m, target.east_m, target.down_m, target.yaw_deg))
         else:
@@ -98,6 +96,7 @@ class DroneMavlink:
                     break
 
         await asyncio.sleep(target.hover_time_ms / 1000)
+        self.__old_target = target
 
 
     async def arm(self):
