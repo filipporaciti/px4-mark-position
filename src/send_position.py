@@ -63,7 +63,7 @@ async def run_send_position(drone_mavlink: DroneMavlink, visual_odometry: Visual
     try:
         while True:
             picam2.capture_request(signal_function=frame_analyzer)
-            await asyncio.sleep(0.001) # Allow other tasks to run
+            await asyncio.sleep(0.01)
     finally:
         picam2.stop()
 
