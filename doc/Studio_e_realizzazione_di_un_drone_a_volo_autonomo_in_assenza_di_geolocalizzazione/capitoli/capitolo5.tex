@@ -2,5 +2,20 @@
 \label{chap:conclusione_sviluppi_futuri}
 
 \section{Risultati}
+In questa tesi è stato sviluppato e sperimentato un sistema di navigazione autonoma per un drone in ambiente indoor, basato sull'utilizzo di marker come riferimenti per il sistema di localizzazione, in alternativa ai tradizionali sistemi di geolocalizzazione. Il sistema ha permesso di integrare un software ad hoc per l'elaborazione delle immagini sul companion computer con il firmware PX4, trasmettendo le stime di posizione e orientamento ottenute mediante visual odometry al flight controller. Inoltre è stato sviluppato un sistema per eseguire le missioni in autonomia, utilizzando la modalità Offboard di PX4.\\ \\
+I test effettuati sul simulatore hanno permesso di sviluppare e verificare il corretto funzionamento del sistema di localizzazione e gestione della missione, mentre gli esperimenti condotti sul drone fisico hanno permesso di valutarne il comportamento in un ambiente reale.\\
+I risultati ottenuti mostrano un sistema stabile, affidabile e preciso, soprattutto per un uso indoor.\\ \\
+Le prove hanno evidenziato alcuni limiti legati alle capacità computazionali, temperature elevate e consumo della RAM del companion computer. Oltre a ciò, si potrebbe rendere il sistema ancora più preciso, soprattutto per quanto riguarda la modalità waypoint. Nonostante tali limitazioni, il sistema realizzato rappresenta una soluzione per la navigazione autonoma in assenza di geolocalizzazione e costituisce una base per ulteriori sviluppi e ottimizzazioni.
 
 \section{Sviluppi futuri}
+I risultati ottenuti, oltre a essere utili per valutare le prestazioni del sistema corrente, permettono di formulare alcune considerazioni per alcuni sviluppi futuri, con l'obiettivo di migliorare il sistema rendendolo più efficiente e affidabile.
+
+\subsubsection{Ottimizzazione degli algoritmi per il companion computer}
+Un possibile sviluppo futuro riguarda l'ottimizzazione degli algoritmi per la VO e un possibile cambiamento della piattaforma hardware utilizzata.  In questo lavoro è stato utilizzato un Raspberry Pi 3B, che permette di eseguire tutti gli algoritmi e le acquisizioni delle immagini senza particolari problemi. Tuttavia, una piattaforma più leggera, compatta ed efficiente potrebbe apportare notevoli benefici in termini di consumi energetici, di gestione della temperatura e di peso complessivo del drone, aspetti di fondamentale importanza nel campo dell'aeronautica. \\
+Una soluzione molto interessante potrebbe essere l'utilizzo di un Raspberry Pi Zero 2 W\footnote{\url{https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/}} combinato con un'ottimizzazione degli algoritmi per la visione artificiale, riducendo il carico computazionale richiesto per l'elaborazione delle immagini. Inoltre, sarà necessario individuare un compromesso tra prestazioni, framerate e le risorse dell'hardware, mantenendo allo stesso tempo un livello di affidabilità adeguato per il volo.
+
+\subsubsection{Algoritmi automatici per la costruzione della mappa dei marker}
+Un'altra possibile evoluzione del sistema potrebbe essere la realizzazione di un algoritmo per la costruzione automatica della mappa dei marker, evitando la necessità di inserire manualmente le coordinate di ciascun marker all'interno del sistema. \\
+L'introduzione di questo algoritmo permetterebbe al sistema di individuare autonomamente la posizione dei marker presenti nell'ambiente durante la fase di esplorazione, costruendo progressivamente una mappa interna. Inoltre, l'algoritmo dovrebbe aggiornare in modo graduale le stime delle posizioni dei marker, riducendo così l'errore di localizzazione.\\
+Una volta costruita, la mappa può essere memorizzata e utilizzata per le missioni successive, permettendo al drone di conoscere la propria posizione. Nella Sec. \ref{sec:problema:letteratura} sono state presentate delle possibili tecnologie utili per la realizzazione di questo algoritmo. \\
+Tale funzionalità rappresenterebbe un'evoluzione del sistema, riducendone le operazioni necessarie per la sua configurazione. 

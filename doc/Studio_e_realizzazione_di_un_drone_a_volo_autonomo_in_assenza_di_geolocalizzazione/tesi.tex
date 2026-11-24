@@ -31,6 +31,7 @@
 \usepackage{subcaption}
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{amsmath}
 
 \lstdefinelanguage{json}{
 	basicstyle=\ttfamily\small,
@@ -186,10 +187,11 @@
 %
 
 \prefacesection{Sommario}
-%La localizzazione è un aspetto in robotica di fondamentale importanza per lo sviluppo di veicoli autonomi. Una possibile soluzione è quella di utilizzare un sistema di geolocalizzazione come il GNSS, ma questi sistemi hanno una precisione di 1-3 metri; si potrebbero utilizzare la geolocalizzazione combinata all’utilizzo della visual odometry nelle zone in cui si vuole una maggiore precisione, ma questa soluzione non si può applicare nel caso in cui i sistemi di geolocalizzazione non sono utilizzabili.\\
-%Questa tesi si pone come obiettivo quello di creare un sistema che è in grado di eseguire missioni autonome sfruttando dei marker fissi come sistema di localizzazione; il tutto deve essere realizzato e testato su un UAV multirotore. \\
-%L’architettura standard dell’UAV prevede l’utilizzo di un flight controller per la gestione del movimento e della posa; inoltre è presente anche un ricevitore GPS per la geolocalizzazione. Tale architettura viene modificata eliminando il GPS dall’UAV e inserendo un companion computer dotato di una camera, attraverso il quale sono stati implementato due sistemi: il primo che permette di catturare, analizzare le immagini dalla camera e inviare posizione e posa dell’UAV al flight controller; il secondo sistema permette di eseguire una missione custom attraverso l’utilizzo della modalità offboard dell’UAV. \\
-%Inizialmente tutti i test sono stati fatti sul simulatore Gazebo con PX4 Autopilot, QGroundControl e un programma scritto in Python per la visual odometry e la mission. Successivamente si è passati ai test con un drone reale utilizzando QGroundControl, le stesse classi Python del simulatore, Raspberry Pi 3, Holybro Pixhawk 6C Mini e la camera OV7251. 
+La localizzazione è un aspetto in robotica di fondamentale importanza per lo sviluppo di veicoli autonomi. Una delle tecnologie maggiormente utilizzate è l'uso di sistemi di geolocalizzazione, come il GNSS o il GPS. Questo tipo di tecnologia ha delle limitazioni, in termini di precisione e della possibilità di inutilizzo sotto certe condizioni. \\
+È proprio a partire da queste limitazioni che sono nate varie soluzioni, con lo scopo di sostituire la geolocalizzazione con sistemi alternativi di localizzazione. \\
+La soluzione proposta in questa tesi è quella di montare una camera sul drone che osservi l'ambiente e che cerchi dei marker fiduciali, con lo scopo di analizzarli attraverso la visione artificiale (Visual Odometry, VO) e calcolare la posizione e l'orientamento del drone nell'ambiente in cui si trova. Inoltre, per eseguire missioni in autonomia senza dipendere dal sistema del flight controller, è stato creato un programma specifico che permette di avere una maggior flessibilità nella loro gestione.\\
+L'architettura dell'UAV è composta dal flight controller, che gestisce il volo e la stima dello stato, e da un companion computer dotato di camera, responsabile dell'esecuzione degli algoritmi della VO tramite marker ArUco e della missione.\\
+Il sistema è stato sviluppato, implementato e sperimentato prima all'interno di un sistema di simulazione di volo; successivamente, il software è stato adattato per il sistema reale e ne sono stati eseguiti i test. Il sistema si è dimostrato in grado di eseguire una missione autonoma in modo stabile, affidabile e preciso.
 
 %
 %			Creazione automatica dell'indice
